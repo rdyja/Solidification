@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="94">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <in>enthalpy_model.cpp</in>
+      <in>main.cpp</in>
+      <in>solid_equation.cpp</in>
+      <in>solid_grid_field.cpp</in>
+      <in>solid_input_data.cpp</in>
+      <in>solid_material.cpp</in>
+      <in>solid_model.cpp</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <flagsDictionary>
+        <element flagsID="0" commonFlags="-std=c++0x -fPIC"/>
+      </flagsDictionary>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath>solidtaly</executablePath>
+          <ccTool>
+            <standard>8</standard>
+            <incDir>
+              <pElem>../../../../Tmp/TalyFEMLib-6.9.9</pElem>
+              <pElem>../../../../lib/petsc-3.4.5/include</pElem>
+              <pElem>../../../../lib/petsc-3.4.5/linux-gnu-opt/include</pElem>
+            </incDir>
+            <preprocessorList>
+              <Elem>PETSC_USE_BOPT_O</Elem>
+            </preprocessorList>
+          </ccTool>
+        </makeTool>
+      </makefileType>
+      <item path="enthalpy_model.cpp" ex="false" tool="1" flavor2="8">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="8">
+      </item>
+      <item path="solid_equation.cpp" ex="false" tool="1" flavor2="8">
+      </item>
+      <item path="solid_grid_field.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="solid_input_data.cpp" ex="false" tool="1" flavor2="8">
+      </item>
+      <item path="solid_material.cpp" ex="false" tool="1" flavor2="8">
+      </item>
+      <item path="solid_model.cpp" ex="false" tool="1" flavor2="8">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

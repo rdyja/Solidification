@@ -1,0 +1,13 @@
+mpicxx -c -std=c++0x -fPIC -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -g3 -fno-inline -O0  -I/home/andre/Tmp/TalyFEMLib-6.9.9 -I/home/andre/lib/petsc-3.4.5/include -I/home/andre/lib/petsc-3.4.5/linux-gnu-opt/include -DPETSC_USE_BOPT_O  main.cpp	
+main.cpp: In function ‘int main(int, char**)’:
+main.cpp:29:9: warning: unused variable ‘pGrid’ [-Wunused-variable]
+   GRID *pGrid = 0;
+         ^
+mpicxx -c -std=c++0x -fPIC -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -g3 -fno-inline -O0  -I/home/andre/Tmp/TalyFEMLib-6.9.9 -I/home/andre/lib/petsc-3.4.5/include -I/home/andre/lib/petsc-3.4.5/linux-gnu-opt/include -DPETSC_USE_BOPT_O  solid_input_data.cpp	
+mpicxx -c -std=c++0x -fPIC -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -g3 -fno-inline -O0  -I/home/andre/Tmp/TalyFEMLib-6.9.9 -I/home/andre/lib/petsc-3.4.5/include -I/home/andre/lib/petsc-3.4.5/linux-gnu-opt/include -DPETSC_USE_BOPT_O  solid_equation.cpp	
+solid_equation.cpp: In member function ‘virtual void SolidEquation::integrands(TALYFEMLIB::FEMElm&, TALYFEMLIB::Matrix<double>&, TALYFEMLIB::ARRAY<double>&)’:
+solid_equation.cpp:10:26: error: ‘class SolidInputData’ has no member named ‘conductivity’
+     double kval = idata->conductivity();
+                          ^
+Makefile:42: polecenia dla obiektu 'solid_equation.o' nie powiodły się
+make: *** [solid_equation.o] Błąd 1
