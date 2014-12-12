@@ -22,7 +22,7 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         const SolidMaterial& mat = inputData.get_material();
 
         if (mat.is_casting())
-            for (int j = 0; j < fe.pElm->nodeno; ++j) {
+            for (int j = 1; j <= fe.pElm->nodeno; ++j) {
                 int globalNumNode = fe.pElm->glbNodeID(j);
                 if (data.Node(globalNumNode).get_prev_temp() > mat.liquidus_temperature()) {
                     double vel = fabs(mat.initial_temperature() - data.Node(globalNumNode).get_prev_temp())/dTime;
@@ -30,7 +30,7 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
                 }
             }
         else
-            for (int j = 0; j < fe.pElm->nodeno; ++j) {
+            for (int j = 1; j <= fe.pElm->nodeno; ++j) {
                 int globalNumNode = fe.pElm->glbNodeID(j);
                 data.Node(globalNumNode).set_velocity(0.0);
             }
