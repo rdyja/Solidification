@@ -167,5 +167,7 @@ bool SolidInputData::ReadFromFile(const std::string& fileName) {
     }
     solid_material_.set_property("coeffBF", tmp);
 
+	solid_material_.update_k();
+
     return true;
 }

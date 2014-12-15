@@ -6,14 +6,13 @@
 #include <cmath>
 #include <cassert>
 
+
 SolidificationModel::SolidificationModel(const SolidMaterial& heat_material,
                                          int model_id) :
     epsT_(1.0),
     mat_(heat_material),
     solidification_model_id_(model_id)
 {
-    k_ = 1.0 - (mat_.liquidus_temperature()-mat_.solidus_temperature())/
-                (mat_.pure_melting_temperature()-mat_.solidus_temperature());
 }
 
 double SolidificationModel::solid_phase_fraction(double T, double vT) const
@@ -75,26 +74,29 @@ double SolidificationModel::equilibrium_solid_phase_fraction(double T) const
 {
     const double TL = mat_.liquidus_temperature();
     const double TM = mat_.pure_melting_temperature();
+    const double k = mat_.get_k();
 
-    return 1.0/(1.0 - k_)*(TL - T)/(TM - T);
+    return 1.0/(1.0 - k)*(TL - T)/(TM - T);
 }
 
 double SolidificationModel::scheil_solid_phase_fraction(double T) const
 {
     const double TL = mat_.liquidus_temperature();
     const double TM = mat_.pure_melting_temperature();
+    const double k = mat_.get_k();
 
-    return 1.0 - pow((TM - T)/(TM - TL), 1.0/(k_ - 1.0));
+    return 1.0 - pow((TM - T)/(TM - TL), 1.0/(k - 1.0));
 }
 
 double SolidificationModel::indirect_solid_phase_fraction(double T, double vT) const
 {
     const double TL = mat_.liquidus_temperature();
     const double TM = mat_.pure_melting_temperature();
+    const double k = mat_.get_k();
     const double alfa = mat_.coefficient_BF()/pow(mat_.grain_size(vT), 2.0);
     const double omega = alfa*(1.0 - exp(-1.0/alfa)) - 0.5*exp(-1.0/(2.0*alfa));
 
-    return 1.0/(1.0 - 2.0*k_*omega) * (1.0 - pow((TM - T)/(TM - TL), (1.0 - 2.0*k_*omega)/(k_ - 1.0)));
+    return 1.0/(1.0 - 2.0*k*omega) * (1.0 - pow((TM - T)/(TM - TL), (1.0 - 2.0*k*omega)/(k - 1.0)));
 }
 
 double SolidificationModel::real_solidus_temperature(double vT) const
@@ -115,10 +117,11 @@ double SolidificationModel::real_solidus_temperature(double vT) const
             return mat_.solidus_temperature();
 
     else {
+		const double k = mat_.get_k();
         double alfa = mat_.coefficient_BF()/pow(mat_.grain_size(vT), 2.0);
-        double nkOmega = 2.0*k_*(alfa*(1.0 - exp(-1.0/alfa)) - 0.5*exp(-1.0/(2.0*alfa)));
+        double nkOmega = 2.0*k*(alfa*(1.0 - exp(-1.0/alfa)) - 0.5*exp(-1.0/(2.0*alfa)));
 
-        double TSE = mat_.pure_melting_temperature() - (mat_.pure_melting_temperature() - mat_.liquidus_temperature())*pow(nkOmega,(k_-1.0)/(1.0-nkOmega));
+        double TSE = mat_.pure_melting_temperature() - (mat_.pure_melting_temperature() - mat_.liquidus_temperature())*pow(nkOmega,(k-1.0)/(1.0-nkOmega));
         if (TSE < mat_.eutectic_temperature()) TSE = mat_.eutectic_temperature();
         if (TSE > mat_.solidus_temperature()) TSE = mat_.solidus_temperature();
 

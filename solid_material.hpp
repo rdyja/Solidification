@@ -50,6 +50,9 @@ public:
   void set_enthalpy_model(int model_id);
   void set_casting(bool casting);
 
+  void update_k();
+  double get_k() const;
+
   double max_grain_size() const;
   double coefficient_BF() const;
   double grain_size(double vT) const;
@@ -61,7 +64,7 @@ private:
   std::unique_ptr<SolidificationModel> solidification_model_;
   std::unique_ptr<EnthalpyModel> enthalpy_model_;
   std::map<std::string, double*> properties;
-  double rhoL_, rhoS_, cL_, cS_, lambdaL_, lambdaS_, Tl_, Ts_, L_, T0_;
+  double rhoL_, rhoS_, cL_, cS_, lambdaL_, lambdaS_, Tl_, Ts_, L_, T0_, k_;
   //Tp_ - pure melting temperature
   //Te_ - euthectic temperature
   double Tp_, Te_, maxGrainSize_, coeffBF_, sourceTerm_;

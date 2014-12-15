@@ -18,6 +18,7 @@ public:
     double solid_phase_fraction(double T, double vT) const;
     double real_solidus_temperature(double vT) const;
 	bool is_in_eutectic_range(double T, double vT) const;
+	void set_k();
 
 private:
     double equilibrium_solid_phase_fraction(double T) const;
@@ -27,7 +28,7 @@ private:
     double epsT_;
     const SolidMaterial& mat_;
     int solidification_model_id_;
-	double k_;
+	//~ double k_;
 };
 
 #endif

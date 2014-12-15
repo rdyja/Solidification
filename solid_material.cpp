@@ -234,3 +234,12 @@ void SolidMaterial::set_property(const string& propertyName, double value) {
     }
     *properties[propertyName] = value;    
 }
+
+void SolidMaterial::update_k() {
+    k_ = 1.0 - (liquidus_temperature() - solidus_temperature())/
+               (pure_melting_temperature() - solidus_temperature());
+}
+
+double SolidMaterial::get_k() const {
+	return k_;
+}
