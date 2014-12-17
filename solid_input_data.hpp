@@ -17,8 +17,14 @@ class SolidInputData : public TALYFEMLIB::InputData {
 	    double time_step() const {
 			return dt_;
 		}
-	    double save_each_step() const {
+	    int save_each_step() const {
 			return save_each_step_;
+		}
+	    int time_log_start() const {
+			return time_log_start_;
+		}
+	    int time_log_stop() const {
+			return time_log_stop_;
 		}
 	    double heat_exchange_coeff() const {
 			return alpha_;
@@ -39,6 +45,7 @@ class SolidInputData : public TALYFEMLIB::InputData {
 	    double dt_;
 	    int num_steps_;
         int save_each_step_;
+        int time_log_start_, time_log_stop_;
         double alpha_;
         double Tamb_;
 };

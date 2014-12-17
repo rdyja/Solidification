@@ -2,6 +2,7 @@
 #include "solid_equation.hpp"
 #include "solid_input_data.hpp"
 #include "solid_grid_field.hpp"
+#include <ExternalLibs/jaz/jaz/TimeLog.hpp>
 
 namespace tf = TALYFEMLIB;
 
@@ -42,30 +43,46 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
     SolidEquation& solidEq, int rank) {
     double dt = inputData.time_step();
     double finalStep = inputData.num_steps();
+    int logStart = inputData.time_log_start();
+    int logStop = inputData.time_log_stop();
     int save = inputData.save_each_step() == 0 ? 1 : inputData.save_each_step();
     double	t = 0.0;
     string resultFileNamePrefix = "data_final", extension = ".plt";
-    stringstream ss;
+    stringstream sfln, st;
 
     SetIC(data, inputData);
+    jaz::TimeLog timeLogger("Total_solve", finalStep);
 
     for(int i = 0; i < finalStep; ++i) {
+        if (i == logStart) timeLogger.start();
         t += dt;
         compute_cooling_velocity_before_liquidus(inputData, data, t);
         solidEq.Solve(t, dt);
-	data.UpdateDataStructures();
-        PrintStatus("(", t, ") time stepping completed! ", rank);
-        //cout << ss.str().c_str() << endl;
-        if (i%save == 0) {
-            if (inputData.ifBoxGrid) {
-                ss << resultFileNamePrefix << i << extension;
-                data.writeNodeDataToFile(&inputData, ss.str().c_str(), t);
-            } else {
-                ss << resultFileNamePrefix << i << "_" << rank << extension;
-                data.printNodeData(ss.str().c_str());
-            }
-            ss.str(std::string());
+        data.UpdateDataStructures();
+
+        if (i >= logStart && i < logStop) {
+            st << t;
+            timeLogger.add(st.str());
+            st.str(std::string());
         }
+
+        PrintStatus("(", t, ") time stepping completed! ", rank);
+        //cout << sfln.str().c_str() << endl;
+        if (i%save == 0 && !((logStop - logStart) > 0)) {
+            if (inputData.ifBoxGrid) {
+                sfln << resultFileNamePrefix << i << extension;
+                data.writeNodeDataToFile(&inputData, sfln.str().c_str(), t);
+            } else {
+                sfln << resultFileNamePrefix << i << "_" << rank << extension;
+                data.printNodeData(sfln.str().c_str());
+            }
+            sfln.str(std::string());
+        }
+        if (i == logStop - 1) timeLogger.stop();
+    }
+    
+    if ((logStop - logStart) > 0) {
+        timeLogger.print(std::cout);
     }
 }
 

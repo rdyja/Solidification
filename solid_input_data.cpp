@@ -54,6 +54,13 @@ bool SolidInputData::ReadFromFile(const std::string& fileName) {
     }
     if(save_each_step_ == 0) return false;
 
+    if (!ReadValue(conf, "timeLogStart", time_log_start_)) {
+        return false;
+    }
+    if (!ReadValue(conf, "timeLogStop", time_log_stop_)) {
+        return false;
+    }
+
     std::string model;
     if(!ReadValue(conf, "solid_model", model)) {
         return false;
