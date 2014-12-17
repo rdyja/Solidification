@@ -1,0 +1,44 @@
+# Config file
+
+nsd = 3
+ifBoxGrid = 1
+orderOfBF = 1
+ifDD = 0
+gridFile = cube2.dat
+
+Lx = 10 #
+Ly = 10 #
+Lz = 10 #
+Nelemx = 10 #
+Nelemy = 10 #
+Nelemz = 10 #
+
+numberOfSteps = 100
+dt = 0.05
+saveEachStep = 1
+timeLogStart = 0
+timeLogStop = 0
+solid_model = EQUILIBRIUM
+enthalpy_model = LINEAR_ENTHALPY_TYPE
+isCasting = 1
+T0 = 960
+lambdaS = 262E-2
+lambdaL = 104E-2
+rhoS = 2824E-6
+rhoL = 2498E-6
+cS = 1077
+cL = 1275
+Tp = 933
+Te = 821
+Ts = 853
+Tl = 926
+L = 390000
+
+#indirect model
+maxGrainSize = 0.001
+coeffBF = 4.6E-10
+
+#boundary conditions
+alpha = 10E-4
+Tamb = 400
+
