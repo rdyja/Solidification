@@ -81,7 +81,7 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
         if (i == logStop - 1) timeLogger.stop();
     }
     
-    if ((logStop - logStart) > 0) {
+    if ((logStop - logStart) > 0 && (rank == 0)) {
         timeLogger.print(std::cout);
     }
 }
@@ -95,7 +95,11 @@ void readGrid(SolidInputData& inputData, GRID *&pGrid) {
     }
     else {
         pGrid = new GRID;
-        pGrid->loadFromALBERTAFile(inputData.inputFilenameGrid.c_str());
+        if (inputData.ifDD) {
+            pGrid->loadFromALBERTAFileDD(inputData.inputFilenameGrid.c_str());
+        } else {
+            pGrid->loadFromALBERTAFile(inputData.inputFilenameGrid.c_str());
+        }
     }
 
 }
