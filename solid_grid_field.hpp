@@ -1,9 +1,9 @@
-#include <Grid/GridField.h>
+#include <Grid/gridfield.h>
 #include "solid_node_data.hpp"
 
 class SolidInputData;
 
-class SolidGridField:public TALYFEMLIB::GridField<SolidNodeData, TALYFEMLIB::GPData, TALYFEMLIB::SurfaceGPData>
+class SolidGridField:public TALYFEMLIB::GridField<SolidNodeData>
 {
 public:
     SolidGridField(const SolidInputData& inputData) :  inputData_(inputData) {

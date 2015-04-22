@@ -3,7 +3,7 @@
 
 #include <string>
 #include <memory>
-#include <InputData/InputData.hpp>
+#include <InputData/InputData.h>
 #include "solid_model.hpp"
 #include "enthalpy_model.hpp"
 #include "solid_material.hpp"
@@ -39,8 +39,8 @@ class SolidInputData : public TALYFEMLIB::InputData {
                 return solid_material_;
             }
 	private:
-            int recognize_solid_model(const string&);
-            int recognize_enthalpy_model(const string& model);
+            int recognize_solid_model(const std::string&);
+            int recognize_enthalpy_model(const std::string& model);
 	    SolidMaterial solid_material_;
 	    double dt_;
 	    int num_steps_;

@@ -14,16 +14,16 @@ inline bool SetIC(SolidGridField& data, SolidInputData& idata) {
 void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         SolidGridField& data, double dTime)
 {
-    int ne = data.pGrid->getNoElms();
+    int ne = data.pGrid->n_nodes();
     TALYFEMLIB::FEMElm fe;
-    for (int i = 1; i <= ne; ++i) {
+    for (int i = 0; i < ne; ++i) {
         fe.refill(data.pGrid, i);
         //fe.setRelativeOrder(inputData.orderOfBF);
 
         const SolidMaterial& mat = inputData.get_material();
 
         if (mat.is_casting())
-            for (int j = 1; j <= fe.pElm->nodeno; ++j) {
+            for (int j = 0; j < fe.pElm->nodeno; ++j) {
                 int globalNumNode = fe.pElm->glbNodeID(j);
                 if (data.Node(globalNumNode).get_prev_temp() > mat.liquidus_temperature()) {
                     double vel = fabs(mat.initial_temperature() - data.Node(globalNumNode).get_prev_temp())/dTime;
@@ -31,7 +31,7 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
                 }
             }
         else
-            for (int j = 1; j <= fe.pElm->nodeno; ++j) {
+            for (int j = 0; j < fe.pElm->nodeno; ++j) {
                 int globalNumNode = fe.pElm->glbNodeID(j);
                 data.Node(globalNumNode).set_velocity(0.0);
             }
@@ -71,10 +71,11 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
         if (i%save == 0 && !((logStop - logStart) > 0)) {
             if (inputData.ifBoxGrid) {
                 sfln << resultFileNamePrefix << i << extension;
-                data.writeNodeDataToFile(&inputData, sfln.str().c_str(), t);
+                TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
             } else {
                 sfln << resultFileNamePrefix << i << "_" << rank << extension;
-                data.printNodeData(sfln.str().c_str());
+                //data.printNodeData(sfln.str().c_str());                
+                TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
             }
             sfln.str(std::string());
         }
@@ -87,12 +88,9 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
 }
 
 void readGrid(SolidInputData& inputData, GRID *&pGrid) {
-    if (inputData.ifBoxGrid) {
-            if (!CreateGrid(pGrid, &inputData)) {
-                delete pGrid;
-                throw (std::string("Problem with Grid construction"));
-            }
-    }
+    /*if (inputData.ifBoxGrid) {
+        CreateGrid(pGrid, &inputData);
+    }    
     else {
         pGrid = new GRID;
         if (inputData.ifDD) {
@@ -100,8 +98,8 @@ void readGrid(SolidInputData& inputData, GRID *&pGrid) {
         } else {
             pGrid->loadFromALBERTAFile(inputData.inputFilenameGrid.c_str());
         }
-    }
-
+    }*/
+    CreateGrid(pGrid, &inputData);
 }
 
 void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {

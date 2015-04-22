@@ -3,47 +3,47 @@
 SolidEquation::SolidEquation(SolidInputData* id) : idata(id) {
 }
 
-void SolidEquation::Solve(double t, double dt, int bCalculateMatrix) {
-    this->t = t;
-    this->dt = dt;
+void SolidEquation::Solve(double t, double dt) {
+    this->t_ = t;
+    this->dt_ = dt;
 
     fillEssBC();
     ApplyEssBCToSolution();
     Assemble(1);
-    ApplyEssBC(linear);
+    ApplyEssBC();
 
-    SolveKSP(solution, 1, 0);
+    SolveKSP(solution_, 1, 0);
 
-    for(int A=1; A<=pGrid->nodeno; A++){
-        double newval=solution(A);
+    for(int A=0; A < p_grid_->n_nodes(); A++){
+        double newval=solution_(A);
         //pData->Node(A).UpdateDataStructures();
-        pData->Node(A).set_curr_temp(newval);
+        p_data_->Node(A).set_curr_temp(newval);
     }
 }
 
 double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Vsr = 0.0;
-    for(int i = 1; i <= nbf; ++i) {
+    for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->glbNodeID(i);
-        Vsr += pData->Node(J).get_velocity();
+        Vsr += p_data_->Node(J).get_velocity();
     }
     return Vsr /= nbf;
 }
 
 double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
-    for(int i = 1; i <= nbf; ++i) {
+    for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->glbNodeID(i);
-        Tsr += pData->Node(J).get_prev_temp();
+        Tsr += p_data_->Node(J).get_prev_temp();
     }
     return Tsr /= nbf;
 }
 
 double SolidEquation::compute_average_temp_prev(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
-    for(int i = 1; i <= nbf; ++i) {
+    for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->glbNodeID(i);
-        Tsr += pData->Node(J).get_prev_minus_1_temp();
+        Tsr += p_data_->Node(J).get_prev_minus_1_temp();
     }
     return Tsr /= nbf;
 }
@@ -52,26 +52,26 @@ void SolidEquation::fillEssBC() {
     initEssBC();
 }
 
-void SolidEquation::integrands4side(TALYFEMLIB::FEMElm& fe,
-                    int sideInd, TALYFEMLIB::Matrix<double>& Ae, TALYFEMLIB::ARRAY<double>& be) {
+void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe,
+                    int sideInd, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
 
     if (sideInd >= 1 && sideInd <= 6) {
         int nbf = fe.pElm->nodeno;
         double detSideJxW = fe.detJxW();
-        for (int a = 1; a <= nbf; ++a) {
-            for(int b = 1; b <= nbf; ++b) {
+        for (int a = 0; a < nbf; ++a) {
+            for(int b = 0; b < nbf; ++b) {
                 double M = fe.N(a) * detSideJxW;
-                Ae(a,b) += alpha * M/dt;
-                be(a) += alpha * Tamb * M/dt;
+                Ae(a,b) += alpha * M/dt_;
+                be(a) += alpha * Tamb * M/dt_;
             }
         }
     }
 }
 
-void SolidEquation::integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::Matrix<double>& Ae, TALYFEMLIB::ARRAY<double>& be) {
-    const int nsd = pGrid->nsd;
+void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
+    const int nsd = p_grid_->nsd();
     const int nbf = fe.pElm->nodeno;
     const double detJxW = fe.detJxW();
     double Tsr = compute_average_temp(fe, nbf);
@@ -81,16 +81,16 @@ void SolidEquation::integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::Matrix<double
     double lambda = idata->get_material().conductivity(Tsr, Vsr);
     double capacity = idata->get_material().heat_capacity(Tsr, Tpsr, Vsr);
 
-    for(int a=1; a<=nbf; a++){
-	    for(int b=1; b<=nbf; b++){
+    for(int a=0; a< nbf; a++){
+	    for(int b=0; b < nbf; b++){
 			double M = capacity * fe.N(a)*fe.N(b)*detJxW;
             double N = 0;
-            for(int k=1; k<=nsd; k++){
+            for(int k=0; k < nsd; k++){
 				N +=  lambda * fe.dN(a,k)*fe.dN(b,k)*detJxW;
             }
-            Ae(a,b) += M/dt + N;
+            Ae(a,b) += M/dt_ + N;
             int J = fe.pElm->glbNodeID (b);
-            be(a) += M/dt*pData->Node(J).get_prev_temp();
+            be(a) += M/dt_*p_data_->Node(J).get_prev_temp();
         }
     }
 }

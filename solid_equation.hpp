@@ -1,19 +1,19 @@
 #ifndef SOLID_EQUATION_H
 #define SOLID_EQUATION_H
 
-#include <FEM/FEMSolver.h>
+#include <FEM/cequation.h>
 #include "solid_node_data.hpp"
 #include "solid_input_data.hpp"
 
 class SolidEquation
-: public TALYFEMLIB::CEquation<SolidNodeData, TALYFEMLIB::GPData, TALYFEMLIB::SurfaceGPData> {
+: public TALYFEMLIB::CEquation<SolidNodeData> {
     public:
         SolidEquation(SolidInputData* id);
-        virtual void Solve(double t, double dt, int bCalculateMatrix = 1);
-        virtual void integrands(TALYFEMLIB::FEMElm& fe, 
-                TALYFEMLIB::Matrix<double>& Ae, TALYFEMLIB::ARRAY<double>& be);
-        virtual void integrands4side(TALYFEMLIB::FEMElm& fe, 
-                int sideInd, TALYFEMLIB::Matrix<double>& Ae, TALYFEMLIB::ARRAY<double>& be);            
+        virtual void Solve(double t, double dt);
+        virtual void Integrands(TALYFEMLIB::FEMElm& fe, 
+                TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);
+        virtual void Integrands4side(TALYFEMLIB::FEMElm& fe, 
+                int sideInd, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);            
         virtual void fillEssBC();
     private:                
         SolidInputData* idata;

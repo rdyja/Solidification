@@ -2,8 +2,8 @@
 #include <map>
 #include "solid_input_data.hpp"
 
-int SolidInputData::recognize_solid_model(const string& model) {
-    string types[] = {"EQUILIBRIUM", "SCHEIL", "INDIRECT"};
+int SolidInputData::recognize_solid_model(const std::string& model) {
+    std::string types[] = {"EQUILIBRIUM", "SCHEIL", "INDIRECT"};
     for(int i = 0; i < 3; ++i) {
         if(model == types[i])
             return i + 1;
@@ -11,8 +11,8 @@ int SolidInputData::recognize_solid_model(const string& model) {
     throw std::string("Invalid solidification model");
 }
 
-int SolidInputData::recognize_enthalpy_model(const string& model) {
-    string types[] = {"LINEAR_ENTHALPY_TYPE", "QUADRATIC_ENTHALPY_TYPE",
+int SolidInputData::recognize_enthalpy_model(const std::string& model) {
+    std::string types[] = {"LINEAR_ENTHALPY_TYPE", "QUADRATIC_ENTHALPY_TYPE",
         "PIECEWISE_QUADRATIC_ENTHALPY_TYPE"};
 
     for(int i = 0; i < 3; ++i) {

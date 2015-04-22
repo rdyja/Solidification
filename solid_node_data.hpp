@@ -1,7 +1,7 @@
 #ifndef SOLID_NODE_DATA_HPP
 #define SOLID_NODE_DATA_HPP
 
-#include <Grid/GridField.h>
+#include <Grid/nodedata.h>
 
 class SolidNodeData:public TALYFEMLIB::NODEData {
 	public:
