@@ -9,7 +9,7 @@ void SolidEquation::Solve(double t, double dt) {
 
     fillEssBC();
     ApplyEssBCToSolution();
-    Assemble(1);
+    Assemble();
     ApplyEssBC();
 
     SolveKSP(solution_, 1, 0);

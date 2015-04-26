@@ -17,7 +17,7 @@ void SolidGridField::SetIC(int nsd) {
 void SolidGridField::SetBndrIndicator(double width, double length, double
 height)
 {
-    for (int elmID = 0; elmID < pGrid->n_elements(); elmID++) {
+    /*for (int elmID = 0; elmID < pGrid->n_elements(); elmID++) {
         ELEM* e = pGrid->GetElm(elmID);
         for (int i = 0; i < e->getSurfaceNo(); i++) {
             if (e->pElemIDArray[i] == 0) {
@@ -31,7 +31,7 @@ height)
                 }
             }
         }
-    }
+    }*/
 
     ///??? ???
     ///pGrid->setCaredSurfaceIndicator();

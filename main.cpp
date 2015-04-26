@@ -87,21 +87,6 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
     }
 }
 
-void readGrid(SolidInputData& inputData, GRID *&pGrid) {
-    /*if (inputData.ifBoxGrid) {
-        CreateGrid(pGrid, &inputData);
-    }    
-    else {
-        pGrid = new GRID;
-        if (inputData.ifDD) {
-            pGrid->loadFromALBERTAFileDD(inputData.inputFilenameGrid.c_str());
-        } else {
-            pGrid->loadFromALBERTAFile(inputData.inputFilenameGrid.c_str());
-        }
-    }*/
-    CreateGrid(pGrid, &inputData);
-}
-
 void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
     if(!inputData.ReadFromFile()) {
         throw(std::string("Problem with reading input data!"));
@@ -111,7 +96,7 @@ void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
         throw(std::string("Problem with input data, check the config file"));
     }
 
-    readGrid(inputData, pGrid);
+    CreateGrid(pGrid, &inputData);
 }
 
 int main(int argc, char** argv) {
@@ -132,8 +117,9 @@ int main(int argc, char** argv) {
 	SolidGridField data(inputData);
 
         data.redimGrid(pGrid);
-        data.redimNodeData(pGrid);
-        if (!inputData.ifBoxGrid) data.SetBndrIndicator(1.0, 1.0, 1.0);
+        data.redimNodeData();
+        if (!inputData.ifBoxGrid) 
+            data.SetBndrIndicator(1.0, 1.0, 1.0);
 
         int nOfDofPerNode = 1;	//< number of degree of freedom per node
 	solidEq.redimSolver (pGrid, nOfDofPerNode);
