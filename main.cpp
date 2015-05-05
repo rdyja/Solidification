@@ -110,34 +110,36 @@ int main(int argc, char** argv) {
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
         SolidInputData inputData;
         GRID *pGrid = nullptr;
+		{
+			readConfigFile(inputData, pGrid);
 
-        readConfigFile(inputData, pGrid);
+			SolidEquation solidEq(&inputData);
+			SolidGridField data(inputData);
 
-	SolidEquation solidEq(&inputData);
-	SolidGridField data(inputData);
+			data.redimGrid(pGrid);
+			data.redimNodeData();
+			if (!inputData.ifBoxGrid) 
+				data.SetBndrIndicator(1.0, 1.0, 1.0);
 
-        data.redimGrid(pGrid);
-        data.redimNodeData();
-        if (!inputData.ifBoxGrid) 
-            data.SetBndrIndicator(1.0, 1.0, 1.0);
+			int nOfDofPerNode = 1;	//< number of degree of freedom per node
+			solidEq.redimSolver (pGrid, nOfDofPerNode);
+			solidEq.setData( &data );
 
-        int nOfDofPerNode = 1;	//< number of degree of freedom per node
-	solidEq.redimSolver (pGrid, nOfDofPerNode);
-	solidEq.setData( &data );
-
-	performCalculation(inputData, data, solidEq, rank);
+			performCalculation(inputData, data, solidEq, rank);
+		}
+		DestroyGrid(pGrid); // to make sure that grid is destroyed after gridfield
     }
     catch(const std::string& s) {
         std::cerr << s << std::endl;
-	returnCode = -1;
+		returnCode = -1;
     }
-    catch(std::bad_alloc e) {
-	std::cerr << "Problem with memory allocation " << e.what();
-	returnCode = -1;
+    catch(std::bad_alloc& e) {
+		std::cerr << "Problem with memory allocation " << e.what();
+		returnCode = -1;
     }
     catch(...) {
         std::cerr << "Unknown error" << std::endl;
-	returnCode = -1;
+		returnCode = -1;
     }
 
     PetscFinalize();
