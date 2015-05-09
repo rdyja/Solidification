@@ -1,6 +1,7 @@
 #include "solid_equation.hpp"
 
-SolidEquation::SolidEquation(SolidInputData* id) : idata(id) {
+SolidEquation::SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb) :
+	idata(id), pcb_(cb) {
 }
 
 void SolidEquation::Solve(double t, double dt) {
@@ -52,12 +53,13 @@ void SolidEquation::fillEssBC() {
     initEssBC();
 }
 
-void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe,
-                    int sideInd, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
+void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
+		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
+
     double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
 
-    if (sideInd >= 1 && sideInd <= 6) {
+    if (sideInd >= 1 && sideInd <= 6) { //we need to decide which indicators are for the 3rd type BC
         int nbf = fe.pElm->nodeno;
         double detSideJxW = fe.detJxW();
         for (int a = 0; a < nbf; ++a) {
@@ -68,6 +70,28 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe,
             }
         }
     }
+}
+
+void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+		TALYFEMLIB::ZeroMatrix<double>& Aem1, TALYFEMLIB::ZeroMatrix<double>& Aes1,
+		TALYFEMLIB::ZeroMatrix<double>& Aem2, TALYFEMLIB::ZeroMatrix<double>& Aes2,
+		TALYFEMLIB::ZEROARRAY<double>& bem1, TALYFEMLIB::ZEROARRAY<double>& bes1) {
+
+    if (pcb_ != nullptr && sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
+        int nbf = fe.pElm->nodeno;
+        double detSideJxW = fe.detJxW();
+        for (int a = 0; a < nbf; ++a) {
+            for(int b = 0; b < nbf; ++b) {
+            	double some_value_m1 = 0.0;
+            	double some_value_m2 = 0.0;
+            	Aem1(a,b) += some_value_m1;
+            	Aes1(a,b) += -some_value_m1;
+            	Aem2(a,b) += -some_value_m2;
+            	Aes2(a,b) += some_value_m2;
+            }
+        }
+    }
+
 }
 
 void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
