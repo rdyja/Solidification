@@ -1,6 +1,7 @@
 #include <cassert>
 #include <map>
 #include "solid_input_data.hpp"
+#include "extended_input.hpp"
 
 int SolidInputData::recognize_solid_model(const std::string& model) {
     std::string types[] = {"EQUILIBRIUM", "SCHEIL", "INDIRECT"};
@@ -27,14 +28,15 @@ bool SolidInputData::ReadFromFile(const std::string& fileName) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     std::map<std::string, std::string> conf;
+    std::vector<MapConf> groupConfs;
     jaz::ConfigFile cf;
 
-    if (!cf.read(fileName, conf)) {
+    if (!read_config_file(fileName, conf, groupConfs)) {
         if(rank == 0)
-            std::cerr << "Config file error " << cf.error() << std::endl;
+            std::cerr << "Config file error ";// << cf.error() << std::endl;
         return false;
     }
-
+    
     InputData::Initialize(conf, cf);
 
     if(!ReadValue(conf, "gridFile", inputFilenameGrid)) {

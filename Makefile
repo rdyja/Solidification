@@ -1,7 +1,7 @@
 #############################################################################
-FEMLIBPATH = $(HOME)/Programming/Libraries/TalyFEMLib-6.9.10
-PETSC_DIR  = $(HOME)/Programming/Libraries/petsc-3.4.5
-PETSC_ARCH = linux-hypre-gnu-dbg
+FEMLIBPATH = $(HOME)/Moje/Programowanie/Cxx/Projects/soldification
+PETSC_DIR  = $(HOME)/lib/petsc-3.4.5
+PETSC_ARCH = linux-gnu-opt
 ##############################################################################
 include ${PETSC_DIR}/conf/variables
 
@@ -12,11 +12,12 @@ LFLAGS	=
 INCFLAG = 	-DPETSC_USE_BOPT_O
 
 TALYFEMLIBPATH = -L${FEMLIBPATH} -ltalyfem
+JAZ_INCLUDES = ${FEMLIBPATH}/ExternalLibs/jaz
 
-INCPATH	= -I${FEMLIBPATH} ${PETSC_CC_INCLUDES}
-LIBPATH = $(TALYFEMLIBPATH) $(PETSC_LIB)
+INCPATH	= -I${FEMLIBPATH} ${PETSC_CC_INCLUDES} -I${JAZ_INCLUDES}
+LIBPATH = $(TALYFEMLIBPATH) $(PETSC_LIB) -lhdf5
 OBJS = main.o solid_input_data.o solid_equation.o solid_model.o enthalpy_model.o\
- solid_material.o solid_grid_field.o
+ solid_material.o solid_grid_field.o extended_input.o
 
 LIBS	=  $(LIBPATH)
 VPATH=src
