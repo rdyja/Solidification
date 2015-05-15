@@ -79,18 +79,35 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
 }
 
 void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+<<<<<<< HEAD
 		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
 		TALYFEMLIB::ZEROARRAY<double>& be) {
 
     if (contact_bounds_ != nullptr && sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
         int nbf = fe.pElm->nodeno;
 //        double detSideJxW = fe.detJxW();
+=======
+		TALYFEMLIB::ZeroMatrix<double>& Aem1, TALYFEMLIB::ZeroMatrix<double>& Aes1,
+		TALYFEMLIB::ZeroMatrix<double>& Aem2, TALYFEMLIB::ZeroMatrix<double>& Aes2,
+		TALYFEMLIB::ZEROARRAY<double>& bem1, TALYFEMLIB::ZEROARRAY<double>& bes1) {
+
+    if (pcb_ != nullptr && sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
+        int nbf = fe.pElm->nodeno;
+        double detSideJxW = fe.detJxW();
+>>>>>>> 569a2f16c950430887a09ba60fb320bd56c9de09
         for (int a = 0; a < nbf; ++a) {
             for(int b = 0; b < nbf; ++b) {
             	double some_value_m1 = 0.0;
             	double some_value_m2 = 0.0;
+<<<<<<< HEAD
             	Ae1(a,b) += some_value_m1;
             	Ae2(a,b) += some_value_m2;
+=======
+            	Aem1(a,b) += some_value_m1;
+            	Aes1(a,b) += -some_value_m1;
+            	Aem2(a,b) += -some_value_m2;
+            	Aes2(a,b) += some_value_m2;
+>>>>>>> 569a2f16c950430887a09ba60fb320bd56c9de09
             }
         }
     }
