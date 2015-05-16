@@ -54,7 +54,7 @@ void SolidEquation::fillEssBC() {
 
 void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe,
                     int sideInd, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
-    double alpha = idata->heat_exchange_coeff();
+    /*double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
 
     if (sideInd >= 1 && sideInd <= 6) {
@@ -67,7 +67,7 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe,
                 be(a) += alpha * Tamb * M/dt_;
             }
         }
-    }
+    }*/
 }
 
 void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {

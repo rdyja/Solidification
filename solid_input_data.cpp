@@ -23,6 +23,134 @@ int SolidInputData::recognize_enthalpy_model(const std::string& model) {
     throw std::string("Invalid enthalpy model");
 }
 
+bool SolidInputData::recognize_newton_bc(const MapConf& conf) {
+    double alpha_, Tamb_;
+    
+     if (!ReadValue(conf, "alpha", alpha_)) {
+        return false;
+    }
+
+    if (!ReadValue(conf, "Tamb", Tamb_)) {
+        return false;
+    }
+    
+    NewtonBC bc;
+    return true;
+}
+
+bool SolidInputData::recognize_material(const MapConf& conf) {    
+    SolidMaterial solid_material;
+    
+    std::string model;
+    if(!ReadValue(conf, "solid_model", model)) {
+        return false;
+    }
+    
+    solid_material.set_solidification_model(recognize_solid_model(model));
+
+    if(!ReadValue(conf, "enthalpy_model", model)) {
+        return false;
+    }
+
+    solid_material.set_enthalpy_model(recognize_enthalpy_model(model));
+
+    int num;
+
+    if(!ReadValue(conf, "isCasting", num)) {
+        return false;
+    }
+
+    solid_material.set_casting(num);
+
+    double tmp;
+
+    if(!ReadValue(conf, "T0", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("T0", tmp);
+
+    if (!ReadValue(conf, "lambdaS", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("lambdaS", tmp);
+
+    if (!ReadValue(conf, "lambdaL", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("lambdaL", tmp);
+
+    if (!ReadValue(conf, "rhoS", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("rhoS", tmp);
+
+    if (!ReadValue(conf, "rhoL", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("rhoL", tmp);
+
+    if (!ReadValue(conf, "cS", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("cS", tmp);
+
+    if (!ReadValue(conf, "cL", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("cL", tmp);
+
+    if (!ReadValue(conf, "Tp", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("Tp", tmp);
+
+    if (!ReadValue(conf, "Te", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("Te", tmp);
+
+    if (!ReadValue(conf, "Ts", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("Ts", tmp);
+
+    if (!ReadValue(conf, "Tl", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("Tl", tmp);
+
+    if (!ReadValue(conf, "L", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("L", tmp); 
+
+    if (!ReadValue(conf, "maxGrainSize", tmp)) {
+        return false;
+    }
+    solid_material.set_property("maxGrainSize", tmp);
+
+    if (!ReadValue(conf, "coeffBF", tmp)) {
+        return false;
+    }
+    solid_material.set_property("coeffBF", tmp);
+
+    solid_material.update_k();
+    
+    return true;
+}
+
 bool SolidInputData::ReadFromFile(const std::string& fileName) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -61,122 +189,15 @@ bool SolidInputData::ReadFromFile(const std::string& fileName) {
     }
     if (!ReadValue(conf, "timeLogStop", time_log_stop_)) {
         return false;
-    }
-
-    std::string model;
-    if(!ReadValue(conf, "solid_model", model)) {
-        return false;
-    }
-
-    solid_material_.set_solidification_model(recognize_solid_model(model));
-
-    if(!ReadValue(conf, "enthalpy_model", model)) {
-        return false;
-    }
-
-    solid_material_.set_enthalpy_model(recognize_enthalpy_model(model));
-
-    int num;
-
-    if(!ReadValue(conf, "isCasting", num)) {
-        return false;
-    }
-
-    solid_material_.set_casting(num);
-
-    double tmp;
-
-    if(!ReadValue(conf, "T0", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("T0", tmp);
-
-    if (!ReadValue(conf, "lambdaS", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("lambdaS", tmp);
-
-    if (!ReadValue(conf, "lambdaL", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("lambdaL", tmp);
-
-    if (!ReadValue(conf, "rhoS", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("rhoS", tmp);
-
-    if (!ReadValue(conf, "rhoL", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("rhoL", tmp);
-
-    if (!ReadValue(conf, "cS", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("cS", tmp);
-
-    if (!ReadValue(conf, "cL", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("cL", tmp);
-
-    if (!ReadValue(conf, "Tp", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("Tp", tmp);
-
-    if (!ReadValue(conf, "Te", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("Te", tmp);
-
-    if (!ReadValue(conf, "Ts", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("Ts", tmp);
-
-    if (!ReadValue(conf, "Tl", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("Tl", tmp);
-
-    if (!ReadValue(conf, "L", tmp)) {
-        return false;
-    }
-
-    solid_material_.set_property("L", tmp);
-
-    if (!ReadValue(conf, "alpha", alpha_)) {
-        return false;
-    }
-
-    if (!ReadValue(conf, "Tamb", Tamb_)) {
-        return false;
-    }
-
-    if (!ReadValue(conf, "maxGrainSize", tmp)) {
-        return false;
-    }
-    solid_material_.set_property("maxGrainSize", tmp);
-
-    if (!ReadValue(conf, "coeffBF", tmp)) {
-        return false;
-    }
-    solid_material_.set_property("coeffBF", tmp);
-
-	solid_material_.update_k();
+    }   
+    
+    for(auto group : groupConfs) {
+        if(group.find("alpha") != group.end()) {
+            recognize_newton_bc(group);
+        } else {
+            recognize_material(group);
+        }
+    }    
 
     return true;
 }

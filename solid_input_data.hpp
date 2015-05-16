@@ -3,10 +3,13 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include <InputData/InputData.h>
 #include "solid_model.hpp"
 #include "enthalpy_model.hpp"
 #include "solid_material.hpp"
+#include "newton_bc.hpp"
+#include "extended_input.hpp"
 
 class SolidInputData : public TALYFEMLIB::InputData {
 	public:
@@ -25,23 +28,20 @@ class SolidInputData : public TALYFEMLIB::InputData {
 		}
 	    int time_log_stop() const {
 			return time_log_stop_;
-		}
-	    double heat_exchange_coeff() const {
-			return alpha_;
-		}
-	    double ambient_temperature() const {
-			return Tamb_;
-		}
-            double initial_temperature() const {
-                return solid_material_.initial_temperature();
+		}	 
+            double initial_temperature(unsigned ind = 0) const {
+                return solid_materials_[ind].initial_temperature();
             }
-            SolidMaterial& get_material() {
-                return solid_material_;
-            }
+            SolidMaterial& get_material(unsigned ind = 0) {
+                return solid_materials_[ind];
+            }           
 	private:
             int recognize_solid_model(const std::string&);
             int recognize_enthalpy_model(const std::string& model);
-	    SolidMaterial solid_material_;
+            bool recognize_newton_bc(const MapConf& conf);
+            bool recognize_material(const MapConf& grup);
+	    std::vector<SolidMaterial> solid_materials_;
+            std::vector<NewtonBC> boundary_conditions_coeff;
 	    double dt_;
 	    int num_steps_;
         int save_each_step_;
