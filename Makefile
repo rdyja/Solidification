@@ -14,10 +14,11 @@ INCFLAG = 	-DPETSC_USE_BOPT_O
 TALYFEMLIBPATH = -L${FEMLIBPATH} -ltalyfem
 JAZ_INCLUDES = ${FEMLIBPATH}/ExternalLibs/jaz
 
+
 INCPATH	= -I${FEMLIBPATH} ${PETSC_CC_INCLUDES} -I${JAZ_INCLUDES}
 LIBPATH = $(TALYFEMLIBPATH) $(PETSC_LIB) -lhdf5
 OBJS = main.o solid_input_data.o solid_equation.o solid_model.o enthalpy_model.o\
- solid_material.o solid_grid_field.o extended_input.o
+ solid_material.o solid_grid_field.o extended_input.o contact_bounds.o
 
 LIBS	=  $(LIBPATH)
 VPATH=src
@@ -59,13 +60,7 @@ remres:
 	$(CC) -c $(CFLAGS) $(INCPATH) $(INCFLAG)  $<	
 
 
-
-
-
-
 depend:
 	$(CXX) -MM $(CXXFLAGS) *.cpp > depend.mk
-
-
 
 -include depend.mk

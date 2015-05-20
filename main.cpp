@@ -2,6 +2,7 @@
 #include "solid_equation.hpp"
 #include "solid_input_data.hpp"
 #include "solid_grid_field.hpp"
+#include "contact_bounds.hpp"
 #include <ExternalLibs/jaz/jaz/TimeLog.hpp>
 
 namespace tf = TALYFEMLIB;
@@ -14,7 +15,7 @@ inline bool SetIC(SolidGridField& data, SolidInputData& idata) {
 void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         SolidGridField& data, double dTime)
 {
-    int ne = data.pGrid->n_nodes();
+    int ne = data.pGrid->n_elements();
     TALYFEMLIB::FEMElm fe;
     for (int i = 0; i < ne; ++i) {
         fe.refill(data.pGrid, i);
@@ -74,14 +75,14 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
                 TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
             } else {
                 sfln << resultFileNamePrefix << i << "_" << rank << extension;
-                //data.printNodeData(sfln.str().c_str());                
+                //data.printNodeData(sfln.str().c_str());
                 TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
             }
             sfln.str(std::string());
         }
         if (i == logStop - 1) timeLogger.stop();
     }
-    
+
     if ((logStop - logStart) > 0 && (rank == 0)) {
         timeLogger.print(std::cout);
     }
@@ -99,8 +100,28 @@ void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
     CreateGrid(pGrid, &inputData);
 }
 
+ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
+
+	// prepare data (normally should be read from gmsh file)
+	std::vector<PetscInt> pbc_indices_master = {
+			 3,  4,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 29, 30, 31, 32,
+			45, 46, 50, 52, 51, 53, 56, 55, 54, 57, 60, 58, 59, 93, 94, 95
+	};
+	std::vector<PetscInt> pbc_indices_slave = {
+			25, 26, 27, 28, 17, 18, 19, 20, 21, 22, 23, 24, 18, 20, 23, 24,
+			91, 92, 65, 67, 66, 68, 71, 70, 69, 64, 74, 72, 73, 61, 62, 63
+	};
+//	std::vector<int> ind = { 1, 2, 3, 4, 8, 9 };
+//	int indno = 9; // should be number of tags
+
+    // set up periodic boundary object
+    ContactBounds *pcb = new ContactBounds();
+    pcb->LoadContactBounds(pGrid, pbc_indices_master, pbc_indices_slave);
+    return pcb;
+}
+
 int main(int argc, char** argv) {
-    char help[] = "Solves a transient transfer problem!";
+    char help[] = "Solves a solidification problem!";
     int returnCode = 0;
 
     PetscInitialize(&argc,&argv,(char *)0, help);
@@ -112,13 +133,14 @@ int main(int argc, char** argv) {
         GRID *pGrid = nullptr;
 		{
 			readConfigFile(inputData, pGrid);
+			ContactBounds *pcb = NULL;//createContactBounds(inputData, pGrid);
 
-			SolidEquation solidEq(&inputData);
+			SolidEquation solidEq(&inputData, pcb);
 			SolidGridField data(inputData);
 
 			data.redimGrid(pGrid);
 			data.redimNodeData();
-			if (!inputData.ifBoxGrid) 
+			if (!inputData.ifBoxGrid)
 				data.SetBndrIndicator(1.0, 1.0, 1.0);
 
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
@@ -126,6 +148,8 @@ int main(int argc, char** argv) {
 			solidEq.setData( &data );
 
 			performCalculation(inputData, data, solidEq, rank);
+
+			delete pcb;
 		}
 		DestroyGrid(pGrid); // to make sure that grid is destroyed after gridfield
     }
