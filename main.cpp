@@ -15,7 +15,7 @@ inline bool SetIC(SolidGridField& data, SolidInputData& idata) {
 void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         SolidGridField& data, double dTime)
 {
-    int ne = data.pGrid->n_nodes();
+    int ne = data.pGrid->n_elements();
     TALYFEMLIB::FEMElm fe;
     for (int i = 0; i < ne; ++i) {
         fe.refill(data.pGrid, i);
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
         GRID *pGrid = nullptr;
 		{
 			readConfigFile(inputData, pGrid);
-			ContactBounds *pcb = createContactBounds(inputData, pGrid);
+			ContactBounds *pcb = NULL;//createContactBounds(inputData, pGrid);
 
 			SolidEquation solidEq(&inputData, pcb);
 			SolidGridField data(inputData);
