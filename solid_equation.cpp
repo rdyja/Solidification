@@ -24,7 +24,7 @@ void SolidEquation::Solve(double t, double dt) {
 double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Vsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
-        int J = fe.pElm->glbNodeID(i);
+        int J = fe.pElm->ElemToLocalNodeID(i);
         Vsr += p_data_->Node(J).get_velocity();
     }
     return Vsr /= nbf;
@@ -33,7 +33,7 @@ double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) 
 double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
-        int J = fe.pElm->glbNodeID(i);
+        int J = fe.pElm->ElemToLocalNodeID(i);
         Tsr += p_data_->Node(J).get_prev_temp();
     }
     return Tsr /= nbf;
@@ -42,7 +42,7 @@ double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
 double SolidEquation::compute_average_temp_prev(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
-        int J = fe.pElm->glbNodeID(i);
+        int J = fe.pElm->ElemToLocalNodeID(i);
         Tsr += p_data_->Node(J).get_prev_minus_1_temp();
     }
     return Tsr /= nbf;
@@ -58,7 +58,7 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe,
     double Tamb = idata->ambient_temperature();
 
     if (sideInd >= 1 && sideInd <= 6) {
-        int nbf = fe.pElm->nodeno;
+        int nbf = fe.pElm->n_nodes();
         double detSideJxW = fe.detJxW();
         for (int a = 0; a < nbf; ++a) {
             for(int b = 0; b < nbf; ++b) {
@@ -72,7 +72,7 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe,
 
 void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     const int nsd = p_grid_->nsd();
-    const int nbf = fe.pElm->nodeno;
+    const int nbf = fe.pElm->n_nodes();
     const double detJxW = fe.detJxW();
     double Tsr = compute_average_temp(fe, nbf);
     double Tpsr = compute_average_temp_prev(fe, nbf);
@@ -89,7 +89,7 @@ void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<do
 				N +=  lambda * fe.dN(a,k)*fe.dN(b,k)*detJxW;
             }
             Ae(a,b) += M/dt_ + N;
-            int J = fe.pElm->glbNodeID (b);
+            int J = fe.pElm->ElemToLocalNodeID(b);
             be(a) += M/dt_*p_data_->Node(J).get_prev_temp();
         }
     }
