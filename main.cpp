@@ -15,16 +15,16 @@ inline bool SetIC(SolidGridField& data, SolidInputData& idata) {
 void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         SolidGridField& data, double dTime)
 {
-    int ne = data.pGrid->n_elements();
+    int ne = data.p_grid_->n_elements();
     TALYFEMLIB::FEMElm fe;
     for (int i = 0; i < ne; ++i) {
-        fe.refill(data.pGrid, i);
+        fe.refill(data.p_grid_, i);
         //fe.setRelativeOrder(inputData.orderOfBF);
 
         const SolidMaterial& mat = inputData.get_material();
 
         if (mat.is_casting())
-            for (int j = 0; j < fe.pElm->nodeno; ++j) {
+            for (int j = 0; j < fe.pElm->n_nodes(); ++j) {
                 int globalNumNode = fe.pElm->glbNodeID(j);
                 if (data.Node(globalNumNode).get_prev_temp() > mat.liquidus_temperature()) {
                     double vel = fabs(mat.initial_temperature() - data.Node(globalNumNode).get_prev_temp())/dTime;
@@ -32,7 +32,7 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
                 }
             }
         else
-            for (int j = 0; j < fe.pElm->nodeno; ++j) {
+            for (int j = 0; j < fe.pElm->n_nodes(); ++j) {
                 int globalNumNode = fe.pElm->glbNodeID(j);
                 data.Node(globalNumNode).set_velocity(0.0);
             }
@@ -48,8 +48,8 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
     int logStop = inputData.time_log_stop();
     int save = inputData.save_each_step() == 0 ? 1 : inputData.save_each_step();
     double	t = 0.0;
-    string resultFileNamePrefix = "data_final", extension = ".plt";
-    stringstream sfln, st;
+    std::string resultFileNamePrefix = "data_final", extension = ".plt";
+    std::stringstream sfln, st;
 
     SetIC(data, inputData);
     jaz::TimeLog timeLogger("Total_solve", finalStep);

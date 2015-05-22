@@ -82,7 +82,7 @@ void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZEROARRAY<double>& be) {
 
     if (contact_bounds_ != nullptr && sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
-        int nbf = fe.pElm->nodeno;
+        int nbf = fe.pElm->n_nodes();
 //        double detSideJxW = fe.detJxW();
         for (int a = 0; a < nbf; ++a) {
             for(int b = 0; b < nbf; ++b) {
@@ -98,7 +98,7 @@ void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 
 void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     const int nsd = p_grid_->nsd();
-    const int nbf = fe.pElm->nodeno;
+    const int nbf = fe.pElm->n_nodes();
     const double detJxW = fe.detJxW();
     double Tsr = compute_average_temp(fe, nbf);
     double Tpsr = compute_average_temp_prev(fe, nbf);
@@ -164,7 +164,7 @@ void SolidEquation::AssembleVolume(bool assemble_surface) {
     fe.refill(p_grid_, elmID);
     // int order = 0;//p_grid_->basis_order();
     fe.setRelativeOrder(order_);
-    int n = fe.pElm->nodeno * n_dof_;
+    int n = fe.pElm->n_nodes() * n_dof_;
     ZeroMatrix<double> Ae;
     if (recalc_matrix_) {
       Ae.redim(n, n);
@@ -258,7 +258,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 
 	PrintInfo("CalcAebeIndicesWithContact");
 
-	const int vertexn = n_dof_ * fe.pElm->nodeno;
+	const int vertexn = n_dof_ * fe.pElm->n_nodes();
 	rows_out1.redim(vertexn);
 	cols_out1.redim(vertexn);
 	PetscInt* rows_ptr1 = rows_out1.data();
@@ -269,7 +269,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 	PetscInt* cols_ptr2 = cols_out2.data();
 
 	if (p_grid_->parallel_type_ == kNoDomainDecomp) {
-		for (int i = 0; i < fe.pElm->nodeno; i++) {
+		for (int i = 0; i < fe.pElm->n_nodes(); i++) {
 			for (int k = 0; k < n_dof_; k++) {
 				int gid = fe.pElm->pNodeIDArray[i] * n_dof_ + k;
 				int idx = i * n_dof_ + k;

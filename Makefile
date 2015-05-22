@@ -1,8 +1,4 @@
-#############################################################################
-FEMLIBPATH = $(HOME)/Moje/Programowanie/Cxx/Projects/soldification
-PETSC_DIR  = $(HOME)/lib/petsc-3.4.5
-PETSC_ARCH = linux-gnu-opt
-##############################################################################
+include makefile.config
 include ${PETSC_DIR}/conf/variables
 
 CC	=	mpicxx

@@ -42,10 +42,10 @@ public:
 	  inline int GetPeriodicSolPartner(int index) {
 	    return pbc_sol_partners_[index];
 	  }
-	  inline const PeriodicMap* pbc_partners() const {
+	  inline const PeriodicPhysicalMap* pbc_partners() const {
 	    return &pbc_partners_;
 	  }
-	  inline const PeriodicMap* pbc_sol_partners() const {
+	  inline const PeriodicSolutionMap* pbc_sol_partners() const {
 	    return &pbc_sol_partners_;
 	  }
 
@@ -59,8 +59,8 @@ private:
 	GRID* p_grid_;
 	bool is_periodic_;
 	ZEROARRAY<bool> is_node_periodic_;
-	PeriodicMap pbc_partners_;
-	PeriodicMap pbc_sol_partners_;
+	PeriodicPhysicalMap pbc_partners_;
+	PeriodicSolutionMap pbc_sol_partners_;
 };
 
 }
