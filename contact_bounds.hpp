@@ -32,24 +32,26 @@ public:
 	ContactBounds(): p_grid_(nullptr),  is_periodic_(false) { }
 	virtual ~ContactBounds() { }
 
-	  inline bool is_periodic() { return is_periodic_; }
-	  inline bool IsNodePeriodic(int index) {
-	    return is_node_periodic_.get(index);
-	  }
-	  inline int GetPeriodicPartner(int index) {
-	    return pbc_partners_[index];
-	  }
-	  inline int GetPeriodicSolPartner(int index) {
-	    return pbc_sol_partners_[index];
-	  }
-	  inline const PeriodicMap* pbc_partners() const {
-	    return &pbc_partners_;
-	  }
-	  inline const PeriodicMap* pbc_sol_partners() const {
-	    return &pbc_sol_partners_;
-	  }
+	inline bool is_periodic() { return is_periodic_; }
+	inline bool IsNodePeriodic(int index) {
+		return is_node_periodic_.get(index);
+	}
+	inline int GetPeriodicPartner(int index) const {
+		PeriodicMap::const_iterator item = pbc_partners_.find(index);
+		return item != pbc_partners_.end() ? item->second : -1;
+	}
+	inline int GetPeriodicSolPartner(int index) const {
+		PeriodicMap::const_iterator item = pbc_sol_partners_.find(index);
+		return item != pbc_sol_partners_.end() ? item->second : -1;
+	}
+	inline const PeriodicMap* pbc_partners() const {
+		return &pbc_partners_;
+	}
+	inline const PeriodicMap* pbc_sol_partners() const {
+		return &pbc_sol_partners_;
+	}
 
-	  inline GRID* Grid() { return p_grid_; }
+	inline GRID* Grid() { return p_grid_; }
 
 
 	void LoadContactBounds(GRID *pg,

@@ -9,7 +9,7 @@
 class SolidEquation
 : public TALYFEMLIB::CEquation<SolidNodeData> {
     public:
-        SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb);
+        SolidEquation(SolidInputData* id);
         virtual void Solve(double t, double dt);
         virtual void Integrands(TALYFEMLIB::FEMElm& fe,
                 TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);
@@ -17,8 +17,11 @@ class SolidEquation
         		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);
         virtual void fillEssBC();
 
+        // additional methods to use contact BC
+        void InitializeContactBC(TALYFEMLIB::ContactBounds* cb);
+
         // methods adding contact BC to main equation
-        virtual void Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+        bool Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
         		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
         		TALYFEMLIB::ZEROARRAY<double>& be);
         void AssembleElementContact(int elmID, TALYFEMLIB::ZeroMatrix<double>& Ae1,
@@ -39,6 +42,7 @@ class SolidEquation
     private:
         SolidInputData* idata;
         TALYFEMLIB::ContactBounds* contact_bounds_;
+        TALYFEMLIB::ZEROARRAY<bool> has_contact_bc_;
         void compute_additional_values();
         void compute_solid_fraction();
         void compute_real_solidus_temperature();

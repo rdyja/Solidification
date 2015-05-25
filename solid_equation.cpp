@@ -6,8 +6,8 @@
 
 using namespace TALYFEMLIB;
 
-SolidEquation::SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb) :
-	idata(id), contact_bounds_(cb) {
+SolidEquation::SolidEquation(SolidInputData* id) :
+	idata(id), contact_bounds_(NULL) {
 }
 
 void SolidEquation::Solve(double t, double dt) {
@@ -78,11 +78,11 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
     }
 }
 
-void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
 		TALYFEMLIB::ZEROARRAY<double>& be) {
 
-    if (contact_bounds_ != nullptr && sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
+    if (sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
         int nbf = fe.pElm->nodeno;
 //        double detSideJxW = fe.detJxW();
         for (int a = 0; a < nbf; ++a) {
@@ -93,6 +93,9 @@ void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
             	Ae2(a,b) += some_value_m2;
             }
         }
+        return true;
+    } else {
+    	return false;
     }
 
 }
@@ -120,6 +123,19 @@ void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<do
             be(a) += M/dt_*p_data_->Node(J).get_prev_temp();
         }
     }
+}
+
+void SolidEquation::InitializeContactBC(ContactBounds* cb) {
+	contact_bounds_ = cb;
+
+	has_contact_bc_.redim(n_total_dof_);
+	has_contact_bc_.fill(false);
+
+	for (int i = 0; i < p_grid_->n_nodes(); i++) {
+		for (int k = 0; k < n_dof_; k++) { // TODO: not all DOFs have to have contact BC
+			has_contact_bc_.set(i*n_dof_ + k, contact_bounds_->IsNodePeriodic(i));
+		}
+	}
 }
 
 PetscErrorCode SolidEquation::Assemble(bool assemble_surface) {
@@ -208,11 +224,9 @@ void SolidEquation::AssembleElementContact(int elmID,
 
 		while (fe.moreItgPoints()) {
 			fe.update4nextItgPt();
-			for (unsigned int i = 0; i < SurfaceIndicator::MAX_SURFACE_INDICATORS;
-					i++) {
-				if (it->has_indicator(i)) {  //TODO: we need to check here only for specific indicators (contact)
-					flag = true or flag;
-					Integrands4contact(fe, i, Ae1, Ae2, be1);
+			for (unsigned int i = 0; i < SurfaceIndicator::MAX_SURFACE_INDICATORS; i++) {
+				if (it->has_indicator(i)) {
+					flag = Integrands4contact(fe, i, Ae1, Ae2, be1) or flag;
 				}
 			}
 		}
@@ -282,7 +296,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 				}
 				cols_ptr1[idx] = gid;
 
-				if (has_per_bc_.get(gid)) {
+				if (has_contact_bc_.get(gid)) {
 					int lclnodeID = fe.pElm->pNodeIDArray[i];
 					int newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
 					// we don't want this to override an essential condition
@@ -292,6 +306,10 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 						rows_ptr2[idx] = -1;
 					}
 					cols_ptr2[idx] = newNode * n_dof_ + k;
+				} else {
+					rows_ptr2[idx] = -1;
+					cols_ptr2[idx] = -1;
+					PrintError("CalcAebeIndicesWithContact called for surface without contact data");
 				}
 			}
 		}

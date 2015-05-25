@@ -133,9 +133,9 @@ int main(int argc, char** argv) {
         GRID *pGrid = nullptr;
 		{
 			readConfigFile(inputData, pGrid);
-			ContactBounds *pcb = NULL;//createContactBounds(inputData, pGrid);
+			ContactBounds *pcb = createContactBounds(inputData, pGrid);
 
-			SolidEquation solidEq(&inputData, pcb);
+			SolidEquation solidEq(&inputData);
 			SolidGridField data(inputData);
 
 			data.redimGrid(pGrid);
@@ -146,6 +146,7 @@ int main(int argc, char** argv) {
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
 			solidEq.redimSolver (pGrid, nOfDofPerNode);
 			solidEq.setData( &data );
+			solidEq.InitializeContactBC(pcb);
 
 			performCalculation(inputData, data, solidEq, rank);
 

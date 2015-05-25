@@ -24,7 +24,7 @@ void ContactBounds::LoadContactBounds(GRID *pg,
 	  for (size_t i = 0; i < oldID.size(); i++) {
 //	    PetscInt newID = NewNodeID(oldID);
 	    if (p_grid_->parallel_type_ == kWithDomainDecomp) {
-	    	throw TALYException() << "Domain Decomposition unsopported in LoadPeriodicBounds";
+	    	throw TALYException() << "Domain Decomposition unsupported in LoadPeriodicBounds";
 	    } else {
 			is_node_periodic_.set(oldID[i], true);
 			pbc_partners_[oldID[i]] = newID[i];
