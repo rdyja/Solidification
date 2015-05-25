@@ -31,7 +31,7 @@ void SolidEquation::Solve(double t, double dt) {
 double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Vsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
-        int J = fe.pElm->glbNodeID(i);
+        int J = fe.pElm->ElemToLocalNodeID(i);
         Vsr += p_data_->Node(J).get_velocity();
     }
     return Vsr /= nbf;
@@ -40,7 +40,7 @@ double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) 
 double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
-        int J = fe.pElm->glbNodeID(i);
+        int J = fe.pElm->ElemToLocalNodeID(i);
         Tsr += p_data_->Node(J).get_prev_temp();
     }
     return Tsr /= nbf;
@@ -49,7 +49,7 @@ double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
 double SolidEquation::compute_average_temp_prev(TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
-        int J = fe.pElm->glbNodeID(i);
+        int J = fe.pElm->ElemToLocalNodeID(i);
         Tsr += p_data_->Node(J).get_prev_minus_1_temp();
     }
     return Tsr /= nbf;
@@ -115,17 +115,17 @@ void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<do
 				N +=  lambda * fe.dN(a,k)*fe.dN(b,k)*detJxW;
             }
             Ae(a,b) += M/dt_ + N;
-            int J = fe.pElm->glbNodeID (b);
+            int J = fe.pElm->ElemToLocalNodeID(b);
             be(a) += M/dt_*p_data_->Node(J).get_prev_temp();
         }
     }
 }
 
-PetscErrorCode SolidEquation::Assemble(bool assemble_surface) {
+void SolidEquation::Assemble(bool assemble_surface) {
 	PrintInfo("Assemble from SolidEquation");
 
     PetscErrorCode ierr;
-    ierr = UpdateMatPreallocation(); CHKERRQ(ierr);
+    ierr = UpdateMatPreallocation(); //CHKERRQ(ierr);
 
     // zero the stiffness matrix and load
     if (recalc_matrix_) { MatZeroEntries(Ag_); }
@@ -146,14 +146,14 @@ PetscErrorCode SolidEquation::Assemble(bool assemble_surface) {
       AssembleSurface();
     }
     if (recalc_matrix_) {
-      ierr = MatAssemblyBegin(*p_Ag_, MAT_FLUSH_ASSEMBLY); CHKERRQ(ierr);
-      ierr = MatAssemblyEnd(*p_Ag_, MAT_FLUSH_ASSEMBLY); CHKERRQ(ierr);
+      ierr = MatAssemblyBegin(*p_Ag_, MAT_FLUSH_ASSEMBLY); //CHKERRQ(ierr);
+      ierr = MatAssemblyEnd(*p_Ag_, MAT_FLUSH_ASSEMBLY); //CHKERRQ(ierr);
     }
-    ierr = VecAssemblyBegin(*p_bg_); CHKERRQ(ierr);
-    ierr = VecAssemblyEnd(*p_bg_); CHKERRQ(ierr);
+    ierr = VecAssemblyBegin(*p_bg_); //CHKERRQ(ierr);
+    ierr = VecAssemblyEnd(*p_bg_); //CHKERRQ(ierr);
     // printf("assemble finish\n");
 
-	return 0;
+    //return 0;
 }
 
 void SolidEquation::AssembleVolume(bool assemble_surface) {
@@ -198,10 +198,10 @@ void SolidEquation::AssembleElementContact(int elmID,
 
 	bool flag = false; // flag to check if really there is a need to add contact BC to global matrix
 
-	for (ELEM::SurfaceList_type::iterator it = fe.pElm->surfaceIndicator.begin();
-			it != fe.pElm->surfaceIndicator.end(); it++) {
+	for (ELEM::SurfaceList_type::const_iterator it = fe.pElm->surface_indicator_.begin();
+			it != fe.pElm->surface_indicator_.end(); it++) {
 
-		fe.refill(p_grid_, elmID, it->surfaceID());
+		fe.refill(p_grid_, elmID, it->surface_id());
 		fe.setRelativeOrder(order_);
 		fe.initNumItg();
 
@@ -271,7 +271,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 	if (p_grid_->parallel_type_ == kNoDomainDecomp) {
 		for (int i = 0; i < fe.pElm->n_nodes(); i++) {
 			for (int k = 0; k < n_dof_; k++) {
-				int gid = fe.pElm->pNodeIDArray[i] * n_dof_ + k;
+				int gid = fe.pElm->node_id_array(i) * n_dof_ + k;
 				int idx = i * n_dof_ + k;
 
 				if (has_ess_bc_.get(gid)) {
@@ -282,7 +282,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 				cols_ptr1[idx] = gid;
 
 				if (has_per_bc_.get(gid)) {
-					int lclnodeID = fe.pElm->pNodeIDArray[i];
+					int lclnodeID = fe.pElm->node_id_array(i);
 					int newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
 					// we don't want this to override an essential condition
 					if (!has_ess_bc_.get(gid)) {

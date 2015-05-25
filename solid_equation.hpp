@@ -32,7 +32,7 @@ class SolidEquation
 				TALYFEMLIB::ZEROARRAY<PetscInt>& rows_out2, TALYFEMLIB::ZEROARRAY<PetscInt>& cols_out2);
 
         // redefined methods from base class in order to add contact BC
-        virtual PetscErrorCode Assemble(bool assemble_surface = true);
+        virtual void Assemble(bool assemble_surface = true);
         virtual void AssembleVolume(bool assemble_surface = true);
 
 

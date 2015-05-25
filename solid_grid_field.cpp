@@ -5,7 +5,7 @@
 using namespace TALYFEMLIB;
 
 void SolidGridField::SetIC(int nsd) {
-    for(int nodeID=0; nodeID<pGrid->n_nodes(); nodeID++) {
+    for(int nodeID=0; nodeID <  p_grid_->n_nodes(); nodeID++) {
         SolidNodeData* pData = &(Node(nodeID));
         if (nsd == 3) {
             pData->set_curr_temp(inputData_.initial_temperature());

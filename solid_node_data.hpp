@@ -5,6 +5,19 @@
 
 class SolidNodeData:public TALYFEMLIB::NODEData {
 	public:
+            virtual const double& value(int index) const {
+                switch(index) {
+                    case 0:
+                        return t0;
+                    case 1:
+                        return t1;
+                    case 2:
+                        return t2;
+                    case 3:
+                        return v;
+                }
+                throw std::string("Wrong node value");
+            }
             virtual double& value(int index) {
                 switch(index) {
                     case 0:
