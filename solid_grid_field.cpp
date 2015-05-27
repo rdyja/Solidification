@@ -8,7 +8,10 @@ void SolidGridField::SetIC(int nsd) {
     for(int nodeID=0; nodeID <  p_grid_->n_nodes(); nodeID++) {
         SolidNodeData* pData = &(Node(nodeID));
         if (nsd == 3) {
-            pData->set_curr_temp(inputData_.initial_temperature());
+            int elem_id = p_grid_->node_array_[nodeID]->elem_id_;
+            ELEM *elem = p_grid_->elm_array_[elem_id];
+            int mat_ind = elem->mat_ind();
+            pData->set_curr_temp(inputData_.initial_temperature(mat_ind));
         }
     }
     PrintStatusStream(std::cerr, "IC set ");

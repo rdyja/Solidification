@@ -61,6 +61,9 @@ void SolidEquation::fillEssBC() {
 
 void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
+    int mat_ind = fe.pElm->mat_ind();
+    NewtonBC bc = idata->get_bc(mat_ind);
+    bc.calculate(fe, Ae, be, dt_);
     /*double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
 
@@ -102,10 +105,11 @@ void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<do
     const double detJxW = fe.detJxW();
     double Tsr = compute_average_temp(fe, nbf);
     double Tpsr = compute_average_temp_prev(fe, nbf);
-    double Vsr = compute_average_velocity(fe, nbf);
+    double Vsr = compute_average_velocity(fe, nbf);    
+    int mat_ind = fe.pElm->mat_ind();
     //TODO: Change to calculated values
-    double lambda = idata->get_material().conductivity(Tsr, Vsr);
-    double capacity = idata->get_material().heat_capacity(Tsr, Tpsr, Vsr);
+    double lambda = idata->get_material(mat_ind).conductivity(Tsr, Vsr);
+    double capacity = idata->get_material(mat_ind).heat_capacity(Tsr, Tpsr, Vsr);
 
     for(int a=0; a< nbf; a++){
 	    for(int b=0; b < nbf; b++){
@@ -126,7 +130,7 @@ void SolidEquation::Assemble(bool assemble_surface) {
 
     PetscErrorCode ierr;
     ierr = UpdateMatPreallocation(); //CHKERRQ(ierr);
-
+    
     // zero the stiffness matrix and load
     if (recalc_matrix_) { MatZeroEntries(Ag_); }
     // trying to do VecZeroEntries (bg_);

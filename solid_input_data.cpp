@@ -1,5 +1,6 @@
 #include <cassert>
 #include <map>
+#include <Grid/material.h>
 #include "solid_input_data.hpp"
 #include "extended_input.hpp"
 
@@ -24,52 +25,52 @@ int SolidInputData::recognize_enthalpy_model(const std::string& model) {
 }
 
 bool SolidInputData::recognize_newton_bc(const MapConf& conf) {
-    double alpha_, Tamb_;
-    
-     if (!ReadValue(conf, "alpha", alpha_)) {
+    double alpha, Tamb;    
+    std::string name = recognize_name(conf);
+        
+     if (!ReadValue(conf, "alpha", alpha)) {
         return false;
     }
 
-    if (!ReadValue(conf, "Tamb", Tamb_)) {
+    if (!ReadValue(conf, "Tamb", Tamb)) {
         return false;
     }
     
-    NewtonBC bc;
+    NewtonBC bc(alpha, Tamb, name);
+    boundary_conditions_coeff_.push_back(std::move(bc));
+    
     return true;
 }
 
-bool SolidInputData::recognize_material(const MapConf& conf) {    
-    SolidMaterial solid_material;
+std::string SolidInputData::recognize_name(const MapConf& conf) {
+    std::string name;
     
-    std::string model;
-    if(!ReadValue(conf, "solid_model", model)) {
-        return false;
-    }
+    auto iter = conf.find("name");
+    if(iter != conf.end()) {
+        name = iter->second;
+    } 
     
-    solid_material.set_solidification_model(recognize_solid_model(model));
+    if(name.empty())
+        throw std::string("Invalid material name");
+    
+    return name;
+}
 
-    if(!ReadValue(conf, "enthalpy_model", model)) {
+bool SolidInputData::recognize_contact_bc(const MapConf& conf) {
+    double kappa;
+    
+    std::string name = recognize_name(conf);
+    
+     if (!ReadValue(conf, "kappa", kappa)) {
         return false;
-    }
+    }    
+    
+    return true;
+}
 
-    solid_material.set_enthalpy_model(recognize_enthalpy_model(model));
-
-    int num;
-
-    if(!ReadValue(conf, "isCasting", num)) {
-        return false;
-    }
-
-    solid_material.set_casting(num);
-
+bool SolidInputData::set_casting_properties(const MapConf& conf, SolidMaterial& solid_material) {
     double tmp;
-
-    if(!ReadValue(conf, "T0", tmp)) {
-        return false;
-    }
-
-    solid_material.set_property("T0", tmp);
-
+    
     if (!ReadValue(conf, "lambdaS", tmp)) {
         return false;
     }
@@ -145,8 +146,92 @@ bool SolidInputData::recognize_material(const MapConf& conf) {
         return false;
     }
     solid_material.set_property("coeffBF", tmp);
+    
+    return true;
+}
+
+bool SolidInputData::set_conductivity_properties(const MapConf& conf, SolidMaterial& solid_material) {
+    double tmp;
+    const double LARGE_NUMBER = 1e30;
+    
+    if (!ReadValue(conf, "lambdaS", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("lambdaS", tmp);
+    
+    solid_material.set_property("lambdaL", 0.0);
+
+    if (!ReadValue(conf, "rhoS", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("rhoS", tmp);
+
+    solid_material.set_property("rhoL", 0.0);
+
+    if (!ReadValue(conf, "cS", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("cS", tmp);
+
+    solid_material.set_property("cL", 0.0); 
+    solid_material.set_property("Tp", LARGE_NUMBER);
+    solid_material.set_property("Te", LARGE_NUMBER);
+    solid_material.set_property("Ts", LARGE_NUMBER);
+    solid_material.set_property("Tl", LARGE_NUMBER);
+    solid_material.set_property("L", 0.0); 
+    solid_material.set_property("maxGrainSize", 0.0);
+    solid_material.set_property("coeffBF", 0.0);
+    
+    return true;
+}
+
+bool SolidInputData::recognize_material(const MapConf& conf) {    
+    SolidMaterial solid_material;    
+    
+    
+    solid_material.set_name(recognize_name(conf));    
+    
+    std::string model;
+    if(!ReadValue(conf, "solid_model", model)) {
+        return false;
+    }
+    
+    solid_material.set_solidification_model(recognize_solid_model(model));
+
+    if(!ReadValue(conf, "enthalpy_model", model)) {
+        return false;
+    }
+
+    solid_material.set_enthalpy_model(recognize_enthalpy_model(model));
+
+    int num;
+
+    if(!ReadValue(conf, "isCasting", num)) {
+        return false;
+    }
+
+    solid_material.set_casting(num);
+
+    double tmp;
+
+    if(!ReadValue(conf, "T0", tmp)) {
+        return false;
+    }
+
+    solid_material.set_property("T0", tmp);
+
+    if (solid_material.is_casting()) {
+        set_casting_properties(conf, solid_material);
+    } else {
+        set_conductivity_properties(conf, solid_material);
+    }
 
     solid_material.update_k();
+    
+    solid_materials_.push_back(std::move(solid_material));
     
     return true;
 }
@@ -194,10 +279,35 @@ bool SolidInputData::ReadFromFile(const std::string& fileName) {
     for(auto group : groupConfs) {
         if(group.find("alpha") != group.end()) {
             recognize_newton_bc(group);
+        } else if(group.find("kappa") != group.end()) {
+            recognize_contact_bc(group);            
         } else {
             recognize_material(group);
         }
     }    
 
     return true;
+}
+
+void SolidInputData::find_maping_materials(const TALYFEMLIB::GRID& grid) {    
+    std::map<std::string, int> reverse_map;
+    
+    for(unsigned i = 0; i < solid_materials_.size(); ++i) {
+        reverse_map[solid_materials_[i].name()] = i;
+    }
+    
+    std::map<std::string, int> reverse_map_bc;
+    
+    for(unsigned i = 0; i < boundary_conditions_coeff_.size(); ++i) {
+        reverse_map[boundary_conditions_coeff_[i].name()] = i;
+    }
+    
+    for(auto iter = grid.material_desc_.begin(); iter != grid.material_desc_.end(); ++iter) {
+        int real_ind = reverse_map[iter->second.tag];
+        if(iter->second.type == TALYFEMLIB::TYPE_MATERIAL::VOLUME) {
+            map_materials_[iter->first] = real_ind;
+        } else {
+            map_bc_[iter->first] = real_ind;
+        }        
+    }
 }

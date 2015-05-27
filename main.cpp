@@ -98,6 +98,7 @@ void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
     }
 
     CreateGrid(pGrid, &inputData);
+    inputData.find_maping_materials(*pGrid);
 }
 
 ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
