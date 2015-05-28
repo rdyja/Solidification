@@ -140,13 +140,16 @@ int main(int argc, char** argv) {
 
 			data.redimGrid(pGrid);
 			data.redimNodeData();
-			if (!inputData.ifBoxGrid)
-				data.SetBndrIndicator(1.0, 1.0, 1.0);
 
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
 			solidEq.redimSolver (pGrid, nOfDofPerNode);
 			solidEq.setData( &data );
-			solidEq.InitializeContactBC(pcb);
+			if (pcb)
+				solidEq.InitializeContactBC(pcb);
+
+			if (!inputData.ifBoxGrid && pcb)
+				data.SetBndrIndicator(*pcb);
+//			pGrid->PrintElmSurfaceIndicator();
 
 			performCalculation(inputData, data, solidEq, rank);
 

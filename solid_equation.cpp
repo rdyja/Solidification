@@ -84,13 +84,13 @@ bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 
     if (sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
         int nbf = fe.pElm->nodeno;
-//        double detSideJxW = fe.detJxW();
+        double detSideJxW = fe.detJxW();
+        double kappa = 0.0;
         for (int a = 0; a < nbf; ++a) {
-            for(int b = 0; b < nbf; ++b) {
-            	double some_value_m1 = 0.0;
-            	double some_value_m2 = 0.0;
-            	Ae1(a,b) += some_value_m1;
-            	Ae2(a,b) += some_value_m2;
+            for (int b = 0; b < nbf; ++b) {
+            	double M = fe.N(a) * detSideJxW;
+            	Ae1(a,b) += -kappa * M/dt_;;
+            	Ae2(a,b) +=  kappa * M/dt_;
             }
         }
         return true;
@@ -153,7 +153,7 @@ PetscErrorCode SolidEquation::Assemble(bool assemble_surface) {
     VecGetArray(bg_, &array);
     memset(array, 0, sizeof(double)*nlocal);
     VecRestoreArray(bg_, &array);
-    // printf(" Assembling Volume \n");
+
     if (has_uniform_mesh_) {
       AssembleVolumeUniformMesh(assemble_surface);
     } else {
@@ -168,7 +168,6 @@ PetscErrorCode SolidEquation::Assemble(bool assemble_surface) {
     }
     ierr = VecAssemblyBegin(*p_bg_); CHKERRQ(ierr);
     ierr = VecAssemblyEnd(*p_bg_); CHKERRQ(ierr);
-    // printf("assemble finish\n");
 
 	return 0;
 }
@@ -211,7 +210,7 @@ void SolidEquation::AssembleElementContact(int elmID,
 		ZeroMatrix<double>& Ae1, ZeroMatrix<double>& Ae2,
 		ZEROARRAY<double>& be1, FEMElm& fe, bool assemble_surface) {
 
-	PrintInfo("AssembleElementContact");
+//	PrintInfo("AssembleElementContact");
 
 	bool flag = false; // flag to check if really there is a need to add contact BC to global matrix
 
@@ -240,7 +239,7 @@ void SolidEquation::AssembleElementContact(int elmID,
 void SolidEquation::AssembleAebeWithContact(FEMElm& fe, int elmID,
 		ZeroMatrix<double>& Ae1, ZeroMatrix<double>& Ae2, ZEROARRAY<double>& be) {
 
-	PrintInfo("AssembleAebeWithContact");
+//	PrintInfo("AssembleAebeWithContact");
 
 	ZEROARRAY<PetscInt> vertex_arr1, vertex_col_arr1; // global indices on first side
 	ZEROARRAY<PetscInt> vertex_arr2, vertex_col_arr2; // global indices on second side
@@ -271,7 +270,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 		ZEROARRAY<PetscInt>& rows_out1, ZEROARRAY<PetscInt>& cols_out1,
 		ZEROARRAY<PetscInt>& rows_out2, ZEROARRAY<PetscInt>& cols_out2) {
 
-	PrintInfo("CalcAebeIndicesWithContact");
+//	PrintInfo("CalcAebeIndicesWithContact");
 
 	const int vertexn = n_dof_ * fe.pElm->nodeno;
 	rows_out1.redim(vertexn);
@@ -306,10 +305,12 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 						rows_ptr2[idx] = -1;
 					}
 					cols_ptr2[idx] = newNode * n_dof_ + k;
+//					PrintInfo("gid = ", gid, "\topposite gid = ", newNode);
 				} else {
 					rows_ptr2[idx] = -1;
 					cols_ptr2[idx] = -1;
-					PrintError("CalcAebeIndicesWithContact called for surface without contact data");
+//					PrintInfo("gid = ", gid);
+//					PrintError("CalcAebeIndicesWithContact called for surface without contact data");
 				}
 			}
 		}
