@@ -18,6 +18,9 @@ dt = 0.05
 saveEachStep = 1
 timeLogStart = 0
 timeLogStop = 0
+{
+name = Odlew
+type = material
 solid_model = INDIRECT
 enthalpy_model = LINEAR_ENTHALPY_TYPE
 isCasting = 1
@@ -33,12 +36,17 @@ Te = 821
 Ts = 853
 Tl = 926
 L = 390000
+}
 
 #indirect model
 maxGrainSize = 0.001
 coeffBF = 4.6E-10
 
 #boundary conditions
+{
+name = WBIII
+type = bc
 alpha = 10
 Tamb = 400
+}
 

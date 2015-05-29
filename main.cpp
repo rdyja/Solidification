@@ -141,8 +141,8 @@ int main(int argc, char** argv) {
 
 			data.redimGrid(pGrid);
 			data.redimNodeData();
-			if (!inputData.ifBoxGrid)
-				data.SetBndrIndicator(1.0, 1.0, 1.0);
+			/*if (!inputData.ifBoxGrid)
+				data.SetBndrIndicator(1.0, 1.0, 1.0);*/
 
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
 			solidEq.redimSolver (pGrid, nOfDofPerNode);

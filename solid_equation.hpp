@@ -10,12 +10,12 @@ class SolidEquation
 : public TALYFEMLIB::CEquation<SolidNodeData> {
     public:
         SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb);
-        virtual void Solve(double t, double dt);
-        virtual void Integrands(TALYFEMLIB::FEMElm& fe,
-                TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);
-        virtual void Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
-        		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);
-        virtual void fillEssBC();
+        void Solve(double t, double dt) override;
+        void Integrands(const TALYFEMLIB::FEMElm& fe,
+                TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) override;
+        void Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
+        		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) override;
+        void fillEssBC() override;
 
         // methods adding contact BC to main equation
         virtual void Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
@@ -44,9 +44,9 @@ class SolidEquation
         void compute_real_solidus_temperature();
         void compute_grain_size();
         void compute_heat_flux();
-        double compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf);
-        double compute_average_temp_prev(TALYFEMLIB::FEMElm& fe, int nbf);
-        double compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf);        
+        double compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf);
+        double compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf);
+        double compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf);        
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "newton_bc.hpp"
 
-void NewtonBC::calculate(TALYFEMLIB::FEMElm& fe, 
+void NewtonBC::calculate(const TALYFEMLIB::FEMElm& fe, 
         TALYFEMLIB::ZeroMatrix<double>& Ae, 
         TALYFEMLIB::ZEROARRAY<double>& be, double dt) {
     

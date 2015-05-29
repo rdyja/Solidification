@@ -28,7 +28,7 @@ void SolidEquation::Solve(double t, double dt) {
     }
 }
 
-double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf) {
     double Vsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -37,7 +37,7 @@ double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) 
     return Vsr /= nbf;
 }
 
-double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -46,7 +46,7 @@ double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
     return Tsr /= nbf;
 }
 
-double SolidEquation::compute_average_temp_prev(TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -59,7 +59,7 @@ void SolidEquation::fillEssBC() {
     initEssBC();
 }
 
-void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
+void SolidEquation::Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     int mat_ind = fe.pElm->mat_ind();
     NewtonBC bc = idata->get_bc(mat_ind);
@@ -99,7 +99,7 @@ void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 
 }
 
-void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
+void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     const int nsd = p_grid_->nsd();
     const int nbf = fe.pElm->n_nodes();
     const double detJxW = fe.detJxW();

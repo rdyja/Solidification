@@ -278,11 +278,15 @@ bool SolidInputData::ReadFromFile(const std::string& fileName) {
     
     for(auto group : groupConfs) {
         if(group.find("alpha") != group.end()) {
-            recognize_newton_bc(group);
+            if(!recognize_newton_bc(group)) {
+                return false;
+            }
         } else if(group.find("kappa") != group.end()) {
-            recognize_contact_bc(group);            
+            if(!recognize_contact_bc(group))
+                return false;
         } else {
-            recognize_material(group);
+            if(!recognize_material(group)) 
+                return false;
         }
     }    
 

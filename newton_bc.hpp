@@ -19,7 +19,7 @@ public:
         return name_;
     }
     
-    void calculate(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, 
+    void calculate(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, 
         TALYFEMLIB::ZEROARRAY<double>& be, double dt); 
 private:
     double alpha_, Tamb_;
