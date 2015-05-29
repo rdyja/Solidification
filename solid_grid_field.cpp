@@ -15,7 +15,7 @@ void SolidGridField::SetIC(int nsd) {
 }
 
 
-// temporary function to set properly boundary and surface indicators
+// temporary function to set proper boundary and surface indicators
 // needed for contact boundary condition
 void SolidGridField::SetBndrIndicator(const ContactBounds& pcb)
 {

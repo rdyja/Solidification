@@ -103,16 +103,20 @@ void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
 ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
 
 	// prepare data (normally should be read from gmsh file)
+//	std::vector<PetscInt> pbc_indices_master = {
+//			 3,  4,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 29, 30, 31, 32,
+//			45, 46, 50, 52, 51, 53, 56, 55, 54, 57, 60, 58, 59, 93, 94, 95
+//	};
+//	std::vector<PetscInt> pbc_indices_slave = {
+//			25, 26, 27, 28, 17, 18, 19, 20, 21, 22, 23, 24, 18, 20, 23, 24,
+//			91, 92, 65, 67, 66, 68, 71, 70, 69, 64, 74, 72, 73, 61, 62, 63
+//	};
 	std::vector<PetscInt> pbc_indices_master = {
-			 3,  4,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 29, 30, 31, 32,
-			45, 46, 50, 52, 51, 53, 56, 55, 54, 57, 60, 58, 59, 93, 94, 95
+			2, 3, 6, 7, 21
 	};
 	std::vector<PetscInt> pbc_indices_slave = {
-			25, 26, 27, 28, 17, 18, 19, 20, 21, 22, 23, 24, 18, 20, 23, 24,
-			91, 92, 65, 67, 66, 68, 71, 70, 69, 64, 74, 72, 73, 61, 62, 63
+			9, 12, 13, 16, 25
 	};
-//	std::vector<int> ind = { 1, 2, 3, 4, 8, 9 };
-//	int indno = 9; // should be number of tags
 
     // set up periodic boundary object
     ContactBounds *pcb = new ContactBounds();
@@ -149,7 +153,7 @@ int main(int argc, char** argv) {
 
 			if (!inputData.ifBoxGrid && pcb)
 				data.SetBndrIndicator(*pcb);
-//			pGrid->PrintElmSurfaceIndicator();
+			pGrid->PrintElmSurfaceIndicator();
 
 			performCalculation(inputData, data, solidEq, rank);
 

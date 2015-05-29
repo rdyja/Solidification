@@ -76,6 +76,7 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
             }
         }
     }
+
 }
 
 bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
