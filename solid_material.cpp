@@ -25,6 +25,10 @@ using namespace std;
 SolidMaterial::SolidMaterial(int index)
 //: Material(MY_MATERIAL_TYPE, 16, m, 0)
 {
+    initialize_property_map();
+}
+
+void SolidMaterial::initialize_property_map() {
     properties["lambdaS"] = &lambdaS_;
     properties["cS"] = &cS_;
     properties["rhoS"] = &rhoS_;

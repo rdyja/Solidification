@@ -188,11 +188,12 @@ bool SolidInputData::set_conductivity_properties(const MapConf& conf, SolidMater
     return true;
 }
 
-bool SolidInputData::recognize_material(const MapConf& conf) {    
-    SolidMaterial solid_material;    
+bool SolidInputData::recognize_material(const MapConf& conf) {            
+    solid_materials_.push_back(SolidMaterial());
+    SolidMaterial& solid_material = solid_materials_[solid_materials_.size() - 1];
     
-    
-    solid_material.set_name(recognize_name(conf));    
+    solid_material.set_name(recognize_name(conf));
+    solid_material.initialize_property_map();
     
     std::string model;
     if(!ReadValue(conf, "solid_model", model)) {
@@ -230,8 +231,6 @@ bool SolidInputData::recognize_material(const MapConf& conf) {
     }
 
     solid_material.update_k();
-    
-    solid_materials_.push_back(std::move(solid_material));
     
     return true;
 }

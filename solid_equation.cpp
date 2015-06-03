@@ -111,6 +111,8 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
     const SolidMaterial& material = idata->get_material(mat_ind);
     double lambda = material.conductivity(Tsr, Vsr);
     double capacity = material.heat_capacity(Tsr, Tpsr, Vsr);
+    /*if(capacity != capacity)
+        material.heat_capacity(Tsr, Tpsr, Vsr);*/
 
     for(int a=0; a< nbf; a++){
 	    for(int b=0; b < nbf; b++){

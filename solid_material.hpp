@@ -63,6 +63,7 @@ public:
   bool is_in_eutectic_range(double T, double vT) const;
   MaterialProperty get_property(int num) const;
   void set_property(const std::string&, double);
+  void initialize_property_map();
   
 private:
   std::unique_ptr<SolidificationModel> solidification_model_;
