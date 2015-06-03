@@ -300,7 +300,7 @@ void SolidInputData::find_maping_materials(const TALYFEMLIB::GRID& grid) {
         reverse_map[solid_materials_[i].name()] = i;
     }
     
-    std::map<std::string, int> reverse_map_bc;
+    //std::map<std::string, int> reverse_map_bc;
     
     for(unsigned i = 0; i < boundary_conditions_coeff_.size(); ++i) {
         reverse_map[boundary_conditions_coeff_[i].name()] = i;

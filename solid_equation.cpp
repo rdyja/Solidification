@@ -61,8 +61,8 @@ void SolidEquation::fillEssBC() {
 
 void SolidEquation::Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
-    int mat_ind = fe.pElm->mat_ind();
-    NewtonBC bc = idata->get_bc(mat_ind);
+    //int mat_ind = fe.pElm->mat_ind();
+    NewtonBC bc = idata->get_bc(sideInd);
     bc.calculate(fe, Ae, be, dt_);
     /*double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
@@ -80,7 +80,7 @@ void SolidEquation::Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
     }*/
 }
 
-void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+/*void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
 		TALYFEMLIB::ZEROARRAY<double>& be) {
 
@@ -97,7 +97,7 @@ void SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
         }
     }
 
-}
+}*/
 
 void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     const int nsd = p_grid_->nsd();
@@ -108,8 +108,9 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
     double Vsr = compute_average_velocity(fe, nbf);    
     int mat_ind = fe.pElm->mat_ind();
     //TODO: Change to calculated values
-    double lambda = idata->get_material(mat_ind).conductivity(Tsr, Vsr);
-    double capacity = idata->get_material(mat_ind).heat_capacity(Tsr, Tpsr, Vsr);
+    const SolidMaterial& material = idata->get_material(mat_ind);
+    double lambda = material.conductivity(Tsr, Vsr);
+    double capacity = material.heat_capacity(Tsr, Tpsr, Vsr);
 
     for(int a=0; a< nbf; a++){
 	    for(int b=0; b < nbf; b++){
@@ -125,7 +126,7 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
     }
 }
 
-void SolidEquation::Assemble(bool assemble_surface) {
+/*void SolidEquation::Assemble(bool assemble_surface) {
 	PrintInfo("Assemble from SolidEquation");
 
     PetscErrorCode ierr;
@@ -305,7 +306,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 		exit(1);
 	}
 }
-
+*/
 
 void SolidEquation::compute_additional_values() {
     compute_solid_fraction();

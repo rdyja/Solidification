@@ -101,7 +101,7 @@ void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
     inputData.find_maping_materials(*pGrid);
 }
 
-ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
+/*ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
 
 	// prepare data (normally should be read from gmsh file)
 	std::vector<PetscInt> pbc_indices_master = {
@@ -119,7 +119,7 @@ ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
     ContactBounds *pcb = new ContactBounds();
     pcb->LoadContactBounds(pGrid, pbc_indices_master, pbc_indices_slave);
     return pcb;
-}
+}*/
 
 int main(int argc, char** argv) {
     char help[] = "Solves a solidification problem!";
@@ -138,11 +138,12 @@ int main(int argc, char** argv) {
 
 			SolidEquation solidEq(&inputData, pcb);
 			SolidGridField data(inputData);
-
+                        
 			data.redimGrid(pGrid);
 			data.redimNodeData();
 			/*if (!inputData.ifBoxGrid)
 				data.SetBndrIndicator(1.0, 1.0, 1.0);*/
+                        pGrid->PrintElmSurfaceIndicator();
 
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
 			solidEq.redimSolver (pGrid, nOfDofPerNode);

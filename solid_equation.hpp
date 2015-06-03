@@ -18,7 +18,7 @@ class SolidEquation
         void fillEssBC() override;
 
         // methods adding contact BC to main equation
-        virtual void Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+        /*virtual void Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
         		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
         		TALYFEMLIB::ZEROARRAY<double>& be);
         void AssembleElementContact(int elmID, TALYFEMLIB::ZeroMatrix<double>& Ae1,
@@ -33,7 +33,7 @@ class SolidEquation
 
         // redefined methods from base class in order to add contact BC
         virtual void Assemble(bool assemble_surface = true);
-        virtual void AssembleVolume(bool assemble_surface = true);   
+        virtual void AssembleVolume(bool assemble_surface = true);  */
         
         
     private:
