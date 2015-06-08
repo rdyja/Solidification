@@ -65,15 +65,18 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
     double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
 
-    if (sideInd >= 1 && sideInd <= 6) { //we need to decide which indicators are for the 3rd type BC
+//    if (sideInd >= 1 && sideInd <= 6) { //we need to decide which indicators are for the 3rd type BC
+    if (sideInd == 22) { //we need to decide which indicators are for the 3rd type BC
         int nbf = fe.pElm->nodeno;
         double detSideJxW = fe.detJxW();
         for (int a = 0; a < nbf; ++a) {
-            for(int b = 0; b < nbf; ++b) {
-                double M = fe.N(a) * detSideJxW;
-                Ae(a,b) += alpha * M/dt_;
-                be(a) += alpha * Tamb * M/dt_;
+
+        	for(int b = 0; b < nbf; ++b) {
+                Ae(a,b) += alpha * fe.N(a)*fe.N(b)*detSideJxW/dt_;
             }
+
+            double M = fe.N(a) * detSideJxW;
+            be(a) += alpha * Tamb * M/dt_;
         }
     }
 
@@ -83,17 +86,28 @@ bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
 		TALYFEMLIB::ZEROARRAY<double>& be) {
 
-    if (sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
+//    if (sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
+	if (sideInd == 7) { //we need to decide which indicators are for the 4th type BC
         int nbf = fe.pElm->nodeno;
         double detSideJxW = fe.detJxW();
-        double kappa = 0.0;
+        double kappa = 10.0;
+        PrintInfo("detSideJxW = ", detSideJxW);
         for (int a = 0; a < nbf; ++a) {
             for (int b = 0; b < nbf; ++b) {
-            	double M = fe.N(a) * detSideJxW;
-            	Ae1(a,b) += -kappa * M/dt_;;
-            	Ae2(a,b) +=  kappa * M/dt_;
+            	double M = fe.N(a) * detSideJxW * fe.N(b);
+//            	PrintInfo("a,b = M - ", a, " ", b, " ", M, " ", fe.N(a), " ", fe.N(b));
+            	Ae1(a,b) += -kappa * M/dt_;
+            	Ae2(a,b) += kappa * M/dt_;
             }
         }
+
+//        for (int i = 0; i < nbf; i++) {
+//        	for (int j = 0; j < nbf; j++) {
+//        		PetscPrintf(PETSC_COMM_WORLD, "%g\t", Ae1(i, j));
+//        	}
+//        	PetscPrintf(PETSC_COMM_WORLD, "\n");
+//        }
+
         return true;
     } else {
     	return false;
@@ -133,7 +147,7 @@ void SolidEquation::InitializeContactBC(ContactBounds* cb) {
 	has_contact_bc_.fill(false);
 
 	for (int i = 0; i < p_grid_->n_nodes(); i++) {
-		for (int k = 0; k < n_dof_; k++) { // TODO: not all DOFs have to have contact BC
+		for (int k = 0; k < n_dof_; k++) { // TODO: not all DOFs have contact BC
 			has_contact_bc_.set(i*n_dof_ + k, contact_bounds_->IsNodePeriodic(i));
 		}
 	}
@@ -240,7 +254,7 @@ void SolidEquation::AssembleElementContact(int elmID,
 void SolidEquation::AssembleAebeWithContact(FEMElm& fe, int elmID,
 		ZeroMatrix<double>& Ae1, ZeroMatrix<double>& Ae2, ZEROARRAY<double>& be) {
 
-//	PrintInfo("AssembleAebeWithContact");
+	PrintInfo("AssembleAebeWithContact");
 
 	ZEROARRAY<PetscInt> vertex_arr1, vertex_col_arr1; // global indices on first side
 	ZEROARRAY<PetscInt> vertex_arr2, vertex_col_arr2; // global indices on second side
@@ -252,9 +266,9 @@ void SolidEquation::AssembleAebeWithContact(FEMElm& fe, int elmID,
 								vertex_col_arr1.size(), vertex_col_arr1.data());
 
 	be.fill(0.0); //we should not assemble the same 'be' multiple times
-
 	AssembleAebeWithIndex(Ae2, be, vertex_arr1.size(), vertex_arr1.data(),
 								vertex_col_arr2.size(), vertex_col_arr2.data()); //this requires special handling in preallocate
+
 
 	Ae1.ratio(-1.0); // values on the second side have opposite sign
 	Ae2.ratio(-1.0); // values on the second side have opposite sign
@@ -306,7 +320,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 						rows_ptr2[idx] = -1;
 					}
 					cols_ptr2[idx] = newNode * n_dof_ + k;
-//					PrintInfo("gid = ", gid, "\topposite gid = ", newNode);
+					PrintInfo("gid = ", gid, "\topposite gid = ", newNode);
 				} else {
 					rows_ptr2[idx] = -1;
 					cols_ptr2[idx] = -1;

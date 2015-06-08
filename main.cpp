@@ -112,10 +112,12 @@ ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
 //			91, 92, 65, 67, 66, 68, 71, 70, 69, 64, 74, 72, 73, 61, 62, 63
 //	};
 	std::vector<PetscInt> pbc_indices_master = {
-			2, 3, 6, 7, 21
+//			1, 2, 5, 6, 20
+//			5, 6, 20
 	};
 	std::vector<PetscInt> pbc_indices_slave = {
-			9, 12, 13, 16, 25
+//			8, 11, 12, 15, 24
+//			12, 15, 24
 	};
 
     // set up periodic boundary object
