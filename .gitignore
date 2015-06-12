@@ -1,0 +1,4 @@
+*.o
+*.plt
+makefile.config
+solidtaly

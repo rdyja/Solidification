@@ -11,6 +11,7 @@
 //#include "enthalpy_model.hpp"
 #include <memory>
 #include <map>
+#include <string>
 
 class MaterialProperty {
 		double param;
@@ -28,8 +29,8 @@ class SolidificationModel;
 class SolidMaterial
 {
 public:
-  SolidMaterial(int index = 0);
-
+  explicit SolidMaterial(int index = 0);  
+  
   double conductivity(double T = 0.0, double vT = -1.0) const;
   double specific_heat(double T = 0.0, double vT = -1.0) const;
   double density(double T = 0.0, double vT = -1.0) const;
@@ -44,11 +45,13 @@ public:
 
   double heat_capacity(double T = 0.0, double T_p = 0.0, double vT = -1.0) const;
   double enthalpy(double T, double vT = -1.0) const;
+  std::string name() const;
 
   const SolidificationModel& get_solidification_model() const;
   void set_solidification_model(int model_id);
   void set_enthalpy_model(int model_id);
   void set_casting(bool casting);
+  void set_name(std::string);
 
   void update_k();
   double get_k() const;
@@ -60,6 +63,8 @@ public:
   bool is_in_eutectic_range(double T, double vT) const;
   MaterialProperty get_property(int num) const;
   void set_property(const std::string&, double);
+  void initialize_property_map();
+  
 private:
   std::unique_ptr<SolidificationModel> solidification_model_;
   std::unique_ptr<EnthalpyModel> enthalpy_model_;
@@ -69,6 +74,7 @@ private:
   //Te_ - euthectic temperature
   double Tp_, Te_, maxGrainSize_, coeffBF_, sourceTerm_;
   bool isCasting_;
+  std::string name_;
 };
 
 class SolidMaterialFactory
@@ -136,6 +142,14 @@ inline double SolidMaterial::coefficient_BF() const
 inline const SolidificationModel& SolidMaterial::get_solidification_model() const
 {
     return *solidification_model_;
+}
+
+inline std::string SolidMaterial::name() const {
+    return name_;
+}
+
+inline void SolidMaterial::set_name(std::string n) {
+    name_ = n;
 }
 
 #endif

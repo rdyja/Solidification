@@ -4,7 +4,7 @@ nsd = 3
 ifBoxGrid = 0
 orderOfBF = 1
 ifDD = 0
-gridFile = simple2.msh
+gridFile = cube04B.msh
 
 Lx = 0.1 #
 Ly = 0.1 #
@@ -36,6 +36,9 @@ Te = 821
 Ts = 853
 Tl = 926
 L = 390000
+#indirect model
+maxGrainSize = 0.001
+coeffBF = 4.6E-10
 }
 
 #indirect model
@@ -44,7 +47,37 @@ coeffBF = 4.6E-10
 
 #boundary conditions
 {
-name = WBIII
+name = WBA
+type = bc
+alpha = 10
+Tamb = 400
+}
+{
+name = WBB
+type = bc
+alpha = 10
+Tamb = 400
+}
+{
+name = WBC
+type = bc
+alpha = 10
+Tamb = 400
+}
+{
+name = WBD
+type = bc
+alpha = 10
+Tamb = 400
+}
+{
+name = WBE
+type = bc
+alpha = 10
+Tamb = 400
+}
+{
+name = WBF
 type = bc
 alpha = 10
 Tamb = 400

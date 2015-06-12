@@ -37,17 +37,17 @@ public:
 		return is_node_periodic_.get(index);
 	}
 	inline int GetPeriodicPartner(int index) const {
-		PeriodicMap::const_iterator item = pbc_partners_.find(index);
+		PeriodicPhysicalMap::const_iterator item = pbc_partners_.find(index);
 		return item != pbc_partners_.end() ? item->second : -1;
 	}
 	inline int GetPeriodicSolPartner(int index) const {
-		PeriodicMap::const_iterator item = pbc_sol_partners_.find(index);
+		PeriodicSolutionMap::const_iterator item = pbc_sol_partners_.find(index);
 		return item != pbc_sol_partners_.end() ? item->second : -1;
 	}
-	inline const PeriodicMap* pbc_partners() const {
+	inline const PeriodicPhysicalMap* pbc_partners() const {
 		return &pbc_partners_;
 	}
-	inline const PeriodicMap* pbc_sol_partners() const {
+	inline const PeriodicSolutionMap* pbc_sol_partners() const {
 		return &pbc_sol_partners_;
 	}
 
@@ -61,8 +61,8 @@ private:
 	GRID* p_grid_;
 	bool is_periodic_;
 	ZEROARRAY<bool> is_node_periodic_;
-	PeriodicMap pbc_partners_;
-	PeriodicMap pbc_sol_partners_;
+	PeriodicPhysicalMap pbc_partners_;
+	PeriodicSolutionMap pbc_sol_partners_;
 };
 
 }

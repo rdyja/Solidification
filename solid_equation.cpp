@@ -6,8 +6,8 @@
 
 using namespace TALYFEMLIB;
 
-SolidEquation::SolidEquation(SolidInputData* id) :
-	idata(id), contact_bounds_(NULL) {
+SolidEquation::SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb) 
+ :idata(id), contact_bounds_(NULL) {
 }
 
 void SolidEquation::Solve(double t, double dt) {
@@ -28,7 +28,7 @@ void SolidEquation::Solve(double t, double dt) {
     }
 }
 
-double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf) {
     double Vsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -37,7 +37,7 @@ double SolidEquation::compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf) 
     return Vsr /= nbf;
 }
 
-double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -46,7 +46,7 @@ double SolidEquation::compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf) {
     return Tsr /= nbf;
 }
 
-double SolidEquation::compute_average_temp_prev(TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf) {
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -59,10 +59,12 @@ void SolidEquation::fillEssBC() {
     initEssBC();
 }
 
-void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
+void SolidEquation::Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
-
-    double alpha = idata->heat_exchange_coeff();
+    //int mat_ind = fe.pElm->mat_ind();
+    NewtonBC bc = idata->get_bc(sideInd);
+    bc.calculate(fe, Ae, be, dt_);
+    /*double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
 
 //    if (sideInd >= 1 && sideInd <= 6) { //we need to decide which indicators are for the 3rd type BC
@@ -78,7 +80,8 @@ void SolidEquation::Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
             double M = fe.N(a) * detSideJxW;
             be(a) += alpha * Tamb * M/dt_;
         }
-    }
+
+    }*/
 
 }
 
@@ -88,10 +91,11 @@ bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 
 //    if (sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
 	if (sideInd == 7) { //we need to decide which indicators are for the 4th type BC
-        int nbf = fe.pElm->nodeno;
+        int nbf = fe.pElm->n_nodes();
         double detSideJxW = fe.detJxW();
         double kappa = 10.0;
         PrintInfo("detSideJxW = ", detSideJxW);
+
         for (int a = 0; a < nbf; ++a) {
             for (int b = 0; b < nbf; ++b) {
             	double M = fe.N(a) * detSideJxW * fe.N(b);
@@ -115,16 +119,20 @@ bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 
 }
 
-void SolidEquation::Integrands(TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
+void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     const int nsd = p_grid_->nsd();
     const int nbf = fe.pElm->n_nodes();
     const double detJxW = fe.detJxW();
     double Tsr = compute_average_temp(fe, nbf);
     double Tpsr = compute_average_temp_prev(fe, nbf);
-    double Vsr = compute_average_velocity(fe, nbf);
+    double Vsr = compute_average_velocity(fe, nbf);    
+    int mat_ind = fe.pElm->mat_ind();
     //TODO: Change to calculated values
-    double lambda = idata->get_material().conductivity(Tsr, Vsr);
-    double capacity = idata->get_material().heat_capacity(Tsr, Tpsr, Vsr);
+    const SolidMaterial& material = idata->get_material(mat_ind);
+    double lambda = material.conductivity(Tsr, Vsr);
+    double capacity = material.heat_capacity(Tsr, Tpsr, Vsr);
+    /*if(capacity != capacity)
+        material.heat_capacity(Tsr, Tpsr, Vsr);*/
 
     for(int a=0; a< nbf; a++){
 	    for(int b=0; b < nbf; b++){
@@ -153,12 +161,12 @@ void SolidEquation::InitializeContactBC(ContactBounds* cb) {
 	}
 }
 
-PetscErrorCode SolidEquation::Assemble(bool assemble_surface) {
+void SolidEquation::Assemble(bool assemble_surface) {
 	PrintInfo("Assemble from SolidEquation");
 
     PetscErrorCode ierr;
-    ierr = UpdateMatPreallocation(); CHKERRQ(ierr);
-
+    ierr = UpdateMatPreallocation(); //CHKERRQ(ierr);
+    
     // zero the stiffness matrix and load
     if (recalc_matrix_) { MatZeroEntries(Ag_); }
     // trying to do VecZeroEntries (bg_);
@@ -178,13 +186,13 @@ PetscErrorCode SolidEquation::Assemble(bool assemble_surface) {
       AssembleSurface();
     }
     if (recalc_matrix_) {
-      ierr = MatAssemblyBegin(*p_Ag_, MAT_FLUSH_ASSEMBLY); CHKERRQ(ierr);
-      ierr = MatAssemblyEnd(*p_Ag_, MAT_FLUSH_ASSEMBLY); CHKERRQ(ierr);
+      ierr = MatAssemblyBegin(*p_Ag_, MAT_FLUSH_ASSEMBLY); //CHKERRQ(ierr);
+      ierr = MatAssemblyEnd(*p_Ag_, MAT_FLUSH_ASSEMBLY); //CHKERRQ(ierr);
     }
-    ierr = VecAssemblyBegin(*p_bg_); CHKERRQ(ierr);
-    ierr = VecAssemblyEnd(*p_bg_); CHKERRQ(ierr);
+    ierr = VecAssemblyBegin(*p_bg_); //CHKERRQ(ierr);
+    ierr = VecAssemblyEnd(*p_bg_); //CHKERRQ(ierr);    
 
-	return 0;
+    //return 0;
 }
 
 void SolidEquation::AssembleVolume(bool assemble_surface) {
@@ -195,7 +203,7 @@ void SolidEquation::AssembleVolume(bool assemble_surface) {
     fe.refill(p_grid_, elmID);
     // int order = 0;//p_grid_->basis_order();
     fe.setRelativeOrder(order_);
-    int n = fe.pElm->nodeno * n_dof_;
+    int n = fe.pElm->n_nodes() * n_dof_;
     ZeroMatrix<double> Ae;
     if (recalc_matrix_) {
       Ae.redim(n, n);
@@ -229,10 +237,10 @@ void SolidEquation::AssembleElementContact(int elmID,
 
 	bool flag = false; // flag to check if really there is a need to add contact BC to global matrix
 
-	for (ELEM::SurfaceList_type::iterator it = fe.pElm->surfaceIndicator.begin();
-			it != fe.pElm->surfaceIndicator.end(); it++) {
+	for (ELEM::SurfaceList_type::const_iterator it = fe.pElm->surface_indicator_.begin();
+			it != fe.pElm->surface_indicator_.end(); it++) {
 
-		fe.refill(p_grid_, elmID, it->surfaceID());
+		fe.refill(p_grid_, elmID, it->surface_id());
 		fe.setRelativeOrder(order_);
 		fe.initNumItg();
 
@@ -287,7 +295,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 
 //	PrintInfo("CalcAebeIndicesWithContact");
 
-	const int vertexn = n_dof_ * fe.pElm->nodeno;
+	const int vertexn = n_dof_ * fe.pElm->n_nodes();
 	rows_out1.redim(vertexn);
 	cols_out1.redim(vertexn);
 	PetscInt* rows_ptr1 = rows_out1.data();
@@ -298,9 +306,9 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 	PetscInt* cols_ptr2 = cols_out2.data();
 
 	if (p_grid_->parallel_type_ == kNoDomainDecomp) {
-		for (int i = 0; i < fe.pElm->nodeno; i++) {
+		for (int i = 0; i < fe.pElm->n_nodes(); i++) {
 			for (int k = 0; k < n_dof_; k++) {
-				int gid = fe.pElm->pNodeIDArray[i] * n_dof_ + k;
+				int gid = fe.pElm->node_id_array(i) * n_dof_ + k;
 				int idx = i * n_dof_ + k;
 
 				if (has_ess_bc_.get(gid)) {
@@ -310,8 +318,9 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 				}
 				cols_ptr1[idx] = gid;
 
-				if (has_contact_bc_.get(gid)) {
-					int lclnodeID = fe.pElm->pNodeIDArray[i];
+				if (has_per_bc_.get(gid)) {
+					int lclnodeID = fe.pElm->node_id_array(i);
+					
 					int newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
 					// we don't want this to override an essential condition
 					if (!has_ess_bc_.get(gid)) {

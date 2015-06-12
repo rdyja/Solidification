@@ -9,19 +9,19 @@
 class SolidEquation
 : public TALYFEMLIB::CEquation<SolidNodeData> {
     public:
-        SolidEquation(SolidInputData* id);
-        virtual void Solve(double t, double dt);
-        virtual void Integrands(TALYFEMLIB::FEMElm& fe,
-                TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);
-        virtual void Integrands4side(TALYFEMLIB::FEMElm& fe, int sideInd,
-        		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be);
-        virtual void fillEssBC();
+        SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb);
+        void Solve(double t, double dt) override;
+        void Integrands(const TALYFEMLIB::FEMElm& fe,
+                TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) override;
+        void Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
+        		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) override;
+        void fillEssBC() override;
 
         // additional methods to use contact BC
         void InitializeContactBC(TALYFEMLIB::ContactBounds* cb);
 
         // methods adding contact BC to main equation
-        bool Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+        virtual bool Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
         		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
         		TALYFEMLIB::ZEROARRAY<double>& be);
         void AssembleElementContact(int elmID, TALYFEMLIB::ZeroMatrix<double>& Ae1,
@@ -35,22 +35,23 @@ class SolidEquation
 				TALYFEMLIB::ZEROARRAY<PetscInt>& rows_out2, TALYFEMLIB::ZEROARRAY<PetscInt>& cols_out2);
 
         // redefined methods from base class in order to add contact BC
-        virtual PetscErrorCode Assemble(bool assemble_surface = true);
-        virtual void AssembleVolume(bool assemble_surface = true);
-
-
+        virtual void Assemble(bool assemble_surface = true);
+        virtual void AssembleVolume(bool assemble_surface = true); 
+        
+        
     private:
         SolidInputData* idata;
         TALYFEMLIB::ContactBounds* contact_bounds_;
         TALYFEMLIB::ZEROARRAY<bool> has_contact_bc_;
+        
         void compute_additional_values();
         void compute_solid_fraction();
         void compute_real_solidus_temperature();
         void compute_grain_size();
         void compute_heat_flux();
-        double compute_average_temp(TALYFEMLIB::FEMElm& fe, int nbf);
-        double compute_average_temp_prev(TALYFEMLIB::FEMElm& fe, int nbf);
-        double compute_average_velocity(TALYFEMLIB::FEMElm& fe, int nbf);
+        double compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf);
+        double compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf);
+        double compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf);        
 };
 
 #endif

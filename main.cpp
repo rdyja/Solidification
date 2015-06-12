@@ -15,8 +15,9 @@ inline bool SetIC(SolidGridField& data, SolidInputData& idata) {
 void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         SolidGridField& data, double dTime)
 {
-	int ne = data.p_grid_->n_elements();
     //int ne = data.pGrid->n_elements();
+
+    int ne = data.p_grid_->n_elements();
 
     TALYFEMLIB::FEMElm fe;
     for (int i = 0; i < ne; ++i) {
@@ -100,6 +101,7 @@ void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
     }
 
     CreateGrid(pGrid, &inputData);
+    inputData.find_maping_materials(*pGrid);
 }
 
 ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
@@ -143,11 +145,13 @@ int main(int argc, char** argv) {
 			readConfigFile(inputData, pGrid);
 			ContactBounds *pcb = createContactBounds(inputData, pGrid);
 
-			SolidEquation solidEq(&inputData);
+			SolidEquation solidEq(&inputData, pcb);
 			SolidGridField data(inputData);
-
+                        
 			data.redimGrid(pGrid);
 			data.redimNodeData();
+
+            //pGrid->PrintElmSurfaceIndicator();
 
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
 			solidEq.redimSolver (pGrid, nOfDofPerNode);
