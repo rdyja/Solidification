@@ -1,5 +1,6 @@
 #include <Grid/gridfield.h>
 #include "solid_node_data.hpp"
+#include "contact_bounds.hpp"
 
 class SolidInputData;
 
@@ -10,7 +11,7 @@ public:
     }
 
     void SetIC(int);
-    void SetBndrIndicator(double width, double length, double height);
+    void SetBndrIndicator(const TALYFEMLIB::ContactBounds& pcb);
 private:
     const SolidInputData& inputData_;
 };

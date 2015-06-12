@@ -14,29 +14,21 @@ void SolidGridField::SetIC(int nsd) {
     PrintStatusStream(std::cerr, "IC set ");
 }
 
-void SolidGridField::SetBndrIndicator(double width, double length, double
-height)
-{
-    /*for (int elmID = 0; elmID < pGrid->n_elements(); elmID++) {
-        ELEM* e = pGrid->GetElm(elmID);
-        for (int i = 0; i < e->getSurfaceNo(); i++) {
-            if (e->pElemIDArray[i] == 0) {
-                for (int n = 0; n < e->nodeno; n++) {
-                    if (i == n) continue;
-                    //int inds[] = { 1 };
-                    //int nInd = 1;
-                    int nodeID = e->pNodeIDArray[n];
-                    ///???
-                    pGrid->GetNode(nodeID)->addIndicatorNum(1);
-                }
-            }
-        }
-    }*/
 
-    ///??? ???
-    ///pGrid->setCaredSurfaceIndicator();
-    ///pGrid->genElmSurfaceIndicator();    
-    ///???
+// temporary function to set proper boundary and surface indicators
+// needed for contact boundary condition
+void SolidGridField::SetBndrIndicator(const ContactBounds& pcb)
+{
+	PrintInfo("SolidGridField::SetBndrIndicator");
+	for (int i = 0; i < pGrid->n_nodes() ; i++) {
+		if (pcb.GetPeriodicPartner(i) != -1) {
+			pGrid->GetNode(i)->addIndicatorNum(7); //we need to decide which indicators are for the 4th type BC
+		}
+	}
+
+    pGrid->SetCaredSurfaceIndicator();
+    pGrid->GenElmSurfaceIndicator();
+
     //pGrid->CalcHalfBandWidth();
 }
 
