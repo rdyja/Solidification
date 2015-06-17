@@ -8,6 +8,7 @@
 #include "contact_bounds.hpp"
 
 using namespace TALYFEMLIB;
+using namespace std;
 
 void ContactBounds::LoadContactBounds(GRID *pg,
 		  const std::vector<PetscInt>& oldID, const std::vector<PetscInt>& newID) {
@@ -34,4 +35,29 @@ void ContactBounds::LoadContactBounds(GRID *pg,
 
 }
 
+void ContactBounds::LoadContactBounds(GRID *pg) {
+
+	  p_grid_ = pg;
+	  is_periodic_ = true;
+
+	  const map<int,int>& grid_periodics = pg->get_node_periodics();
+
+	  // set the partners for the boundaries
+	  is_node_periodic_.redim(this->p_grid_->n_nodes());
+	  is_node_periodic_.fill(false);
+
+	  for (map<int,int>::const_iterator it = grid_periodics.begin();
+			  it != grid_periodics.end(); ++it) {
+
+	    if (p_grid_->parallel_type_ == kWithDomainDecomp) {
+	    	throw TALYException() << "Domain Decomposition unsupported in LoadPeriodicBounds";
+	    } else {
+			is_node_periodic_.set(it->first, true);
+			pbc_partners_[it->first] = it->second;
+			pbc_sol_partners_[it->first] = it->second;
+	    }
+
+	  }
+
+}
 

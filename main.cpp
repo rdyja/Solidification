@@ -116,17 +116,18 @@ ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
 //			91, 92, 65, 67, 66, 68, 71, 70, 69, 64, 74, 72, 73, 61, 62, 63
 //	};
 	std::vector<PetscInt> pbc_indices_master = {
-//			1, 2, 5, 6, 20
+			1, 2, 5, 6, 20
 //			5, 6, 20
 	};
 	std::vector<PetscInt> pbc_indices_slave = {
-//			8, 11, 12, 15, 24
+			8, 11, 12, 15, 24
 //			12, 15, 24
 	};
 
     // set up periodic boundary object
     ContactBounds *pcb = new ContactBounds();
     pcb->LoadContactBounds(pGrid, pbc_indices_master, pbc_indices_slave);
+//    pcb->LoadContactBounds(pGrid);
     return pcb;
 }
 
@@ -161,7 +162,7 @@ int main(int argc, char** argv) {
 
 			if (!inputData.ifBoxGrid && pcb)
 				data.SetBndrIndicator(*pcb);
-			//pGrid->PrintElmSurfaceIndicator();
+			pGrid->PrintElmSurfaceIndicator();
 
 			performCalculation(inputData, data, solidEq, rank);
 
