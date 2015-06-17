@@ -22,6 +22,7 @@ void SolidGridField::SetIC(int nsd) {
 // needed for contact boundary condition
 void SolidGridField::SetBndrIndicator(const ContactBounds& pcb)
 {
+/*
 	PrintInfo("SolidGridField::SetBndrIndicator");
 	for (int i = 0; i < p_grid_->n_nodes() ; i++) {
 		if (pcb.GetPeriodicPartner(i) != -1) {
@@ -31,7 +32,7 @@ void SolidGridField::SetBndrIndicator(const ContactBounds& pcb)
 
     p_grid_->SetCaredSurfaceIndicator();
     p_grid_->GenElmSurfaceIndicator();
-
+*/
     //pGrid->CalcHalfBandWidth();
 }
 

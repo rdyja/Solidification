@@ -95,7 +95,7 @@ bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZEROARRAY<double>& be) {
 
 //    if (sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
-	if (sideInd == 7) { //we need to decide which indicators are for the 4th type BC
+	if (sideInd == 3) { //we need to decide which indicators are for the 4th type BC
         int nbf = fe.pElm->n_nodes();
         double detSideJxW = fe.detJxW();
         double kappa = 1000.0;

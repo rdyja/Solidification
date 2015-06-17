@@ -108,26 +108,18 @@ ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
 
 	// prepare data (normally should be read from gmsh file)
 //	std::vector<PetscInt> pbc_indices_master = {
-//			 3,  4,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 29, 30, 31, 32,
-//			45, 46, 50, 52, 51, 53, 56, 55, 54, 57, 60, 58, 59, 93, 94, 95
+//			1, 2, 5, 6, 20
+//			5, 6, 20
 //	};
 //	std::vector<PetscInt> pbc_indices_slave = {
-//			25, 26, 27, 28, 17, 18, 19, 20, 21, 22, 23, 24, 18, 20, 23, 24,
-//			91, 92, 65, 67, 66, 68, 71, 70, 69, 64, 74, 72, 73, 61, 62, 63
-//	};
-	std::vector<PetscInt> pbc_indices_master = {
-			1, 2, 5, 6, 20
-//			5, 6, 20
-	};
-	std::vector<PetscInt> pbc_indices_slave = {
-			8, 11, 12, 15, 24
+//			8, 11, 12, 15, 24
 //			12, 15, 24
-	};
+//	};
 
     // set up periodic boundary object
     ContactBounds *pcb = new ContactBounds();
-    pcb->LoadContactBounds(pGrid, pbc_indices_master, pbc_indices_slave);
-//    pcb->LoadContactBounds(pGrid);
+//    pcb->LoadContactBounds(pGrid, pbc_indices_master, pbc_indices_slave);
+    pcb->ImportContactBounds(pGrid);
     return pcb;
 }
 
@@ -152,8 +144,6 @@ int main(int argc, char** argv) {
 			data.redimGrid(pGrid);
 			data.redimNodeData();
 
-            //pGrid->PrintElmSurfaceIndicator();
-
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
 			solidEq.redimSolver (pGrid, nOfDofPerNode);
 			solidEq.setData( &data );
@@ -162,7 +152,7 @@ int main(int argc, char** argv) {
 
 			if (!inputData.ifBoxGrid && pcb)
 				data.SetBndrIndicator(*pcb);
-			pGrid->PrintElmSurfaceIndicator();
+//			pGrid->PrintElmSurfaceIndicator();
 
 			performCalculation(inputData, data, solidEq, rank);
 

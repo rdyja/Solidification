@@ -35,10 +35,12 @@ void ContactBounds::LoadContactBounds(GRID *pg,
 
 }
 
-void ContactBounds::LoadContactBounds(GRID *pg) {
+void ContactBounds::ImportContactBounds(GRID *pg) {
 
 	  p_grid_ = pg;
 	  is_periodic_ = true;
+
+//	  PrintInfo("TransferContactBounds");
 
 	  const map<int,int>& grid_periodics = pg->get_node_periodics();
 
