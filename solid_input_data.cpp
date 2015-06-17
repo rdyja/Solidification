@@ -307,7 +307,8 @@ void SolidInputData::find_maping_materials(const TALYFEMLIB::GRID& grid) {
     }
 
     for(auto iter = grid.material_desc_.begin(); iter != grid.material_desc_.end(); ++iter) {
-    	auto iter_mat = reverse_map.find(iter->second.tag);
+        std::string  material_tag = iter->second.tag;
+    	auto iter_mat = reverse_map.find(material_tag);
     	if(iter_mat != reverse_map.end()) {
     		int real_ind = iter_mat->second;
     		if(iter->second.type == TALYFEMLIB::TYPE_MATERIAL::VOLUME) {
@@ -318,5 +319,9 @@ void SolidInputData::find_maping_materials(const TALYFEMLIB::GRID& grid) {
     			map_bc_[iter->first] = real_ind;
     		}
     	}
+        else {
+            std::cerr << "Warning: Material:" << material_tag << " not found" << std::endl;
+            std::cerr << "Perhaps, missing \" (quotes) in material property name" << std::endl;
+        }
     }
 }
