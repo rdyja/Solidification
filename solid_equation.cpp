@@ -98,15 +98,15 @@ bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 	if (sideInd == 7) { //we need to decide which indicators are for the 4th type BC
         int nbf = fe.pElm->n_nodes();
         double detSideJxW = fe.detJxW();
-        double kappa = 10.0;
-        PrintInfo("detSideJxW = ", detSideJxW);
+        double kappa = 1000.0;
+//        PrintInfo("detSideJxW = ", detSideJxW);
 
         for (int a = 0; a < nbf; ++a) {
             for (int b = 0; b < nbf; ++b) {
-            	double M = fe.N(a) * detSideJxW * fe.N(b);
+            	double M = fe.N(a) * fe.N(b) * detSideJxW;
 //            	PrintInfo("a,b = M - ", a, " ", b, " ", M, " ", fe.N(a), " ", fe.N(b));
-            	Ae1(a,b) += -kappa * M/dt_;
-            	Ae2(a,b) += kappa * M/dt_;
+            	Ae1(a,b) += kappa * M/dt_;
+            	Ae2(a,b) += -kappa * M/dt_;
             }
         }
 
@@ -162,12 +162,14 @@ void SolidEquation::InitializeContactBC(ContactBounds* cb) {
 	for (int i = 0; i < p_grid_->n_nodes(); i++) {
 		for (int k = 0; k < n_dof_; k++) { // TODO: not all DOFs have contact BC
 			has_contact_bc_.set(i*n_dof_ + k, contact_bounds_->IsNodePeriodic(i));
+//			PrintInfo("i: ", i*n_dof_ + k, " is_node_periodic: ", contact_bounds_->IsNodePeriodic(i),
+//					" has_contact_bc_.get() ", has_contact_bc_.get(i*n_dof_ + k));
 		}
 	}
 }
 
 void SolidEquation::Assemble(bool assemble_surface) {
-	PrintInfo("Assemble from SolidEquation");
+//	PrintInfo("Assemble from SolidEquation");
 
     PetscErrorCode ierr;
     ierr = UpdateMatPreallocation(); //CHKERRQ(ierr);
@@ -201,7 +203,7 @@ void SolidEquation::Assemble(bool assemble_surface) {
 }
 
 void SolidEquation::AssembleVolume(bool assemble_surface) {
-  PrintInfo("AssembleVolume from SolidEquation");
+//  PrintInfo("AssembleVolume from SolidEquation");
   FEMElm fe;
   for (int elmID = 0; elmID < p_grid_->n_elements(); elmID++) {
     if (!IsMyElement(elmID)) continue;
@@ -267,7 +269,7 @@ void SolidEquation::AssembleElementContact(int elmID,
 void SolidEquation::AssembleAebeWithContact(FEMElm& fe, int elmID,
 		ZeroMatrix<double>& Ae1, ZeroMatrix<double>& Ae2, ZEROARRAY<double>& be) {
 
-	PrintInfo("AssembleAebeWithContact");
+//	PrintInfo("AssembleAebeWithContact");
 
 	ZEROARRAY<PetscInt> vertex_arr1, vertex_col_arr1; // global indices on first side
 	ZEROARRAY<PetscInt> vertex_arr2, vertex_col_arr2; // global indices on second side
@@ -323,7 +325,8 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 				}
 				cols_ptr1[idx] = gid;
 
-				if (has_per_bc_.get(gid)) {
+//				PrintInfo("gid = ", gid, "\thas_contact_bc_.get(gid) = ", has_contact_bc_.get(gid));
+				if (has_contact_bc_.get(gid)) {
 					int lclnodeID = fe.pElm->node_id_array(i);
 
 					int newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
@@ -334,7 +337,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 						rows_ptr2[idx] = -1;
 					}
 					cols_ptr2[idx] = newNode * n_dof_ + k;
-					PrintInfo("gid = ", gid, "\topposite gid = ", newNode);
+//					PrintInfo("gid = ", gid, "\topposite gid = ", newNode);
 				} else {
 					rows_ptr2[idx] = -1;
 					cols_ptr2[idx] = -1;

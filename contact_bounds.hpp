@@ -56,6 +56,7 @@ public:
 
 	void LoadContactBounds(GRID *pg,
 			const std::vector<PetscInt>& oldID, const std::vector<PetscInt>& newID);
+	void LoadContactBounds(GRID *pg);
 
 private:
 	GRID* p_grid_;
