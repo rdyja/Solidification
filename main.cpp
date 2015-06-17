@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 
 			SolidEquation solidEq(&inputData, pcb);
 			SolidGridField data(inputData);
-                        
+
 			data.redimGrid(pGrid);
 			data.redimNodeData();
 
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
 
 			if (!inputData.ifBoxGrid && pcb)
 				data.SetBndrIndicator(*pcb);
-			pGrid->PrintElmSurfaceIndicator();
+			//pGrid->PrintElmSurfaceIndicator();
 
 			performCalculation(inputData, data, solidEq, rank);
 

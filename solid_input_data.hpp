@@ -29,17 +29,23 @@ class SolidInputData : public TALYFEMLIB::InputData {
 		}
 	    int time_log_stop() const {
 			return time_log_stop_;
-		}	 
+		}
             double initial_temperature(int ind = 0) const {
                 int mat_ind = map_materials_.find(ind)->second;
                 return solid_materials_[mat_ind].initial_temperature();
             }
             SolidMaterial& get_material(int ind = 0) {
                 return solid_materials_[map_materials_[ind]];
-            }            
-            NewtonBC& get_bc(int ind = 0) {
-                return boundary_conditions_coeff_[map_bc_[ind]];
-            }  
+            }
+            bool get_bc(int ind, NewtonBC*& bc) {
+            	//std::cout << "Map size:" << map_bc_.size() << std::endl;
+            	auto iter = map_bc_.find(ind);
+            	if(iter != map_bc_.end()) {
+            		bc = &boundary_conditions_coeff_[iter->second];
+            		return true;
+            	}
+                return false;
+            }
             void find_maping_materials(const TALYFEMLIB::GRID& grid);
 	private:
             int recognize_solid_model(const std::string&);
@@ -49,11 +55,11 @@ class SolidInputData : public TALYFEMLIB::InputData {
             bool recognize_material(const MapConf& grup);
             std::string recognize_name(const MapConf& map);
             bool set_casting_properties(const MapConf& conf, SolidMaterial& solid_material);
-            bool set_conductivity_properties(const MapConf& conf, SolidMaterial& solid_material);            
+            bool set_conductivity_properties(const MapConf& conf, SolidMaterial& solid_material);
 	    std::vector<SolidMaterial> solid_materials_;
             std::vector<NewtonBC> boundary_conditions_coeff_;
             std::map<int, int> map_materials_;
-            std::map<int, int> map_bc_;            
+            std::map<int, int> map_bc_;
 	    double dt_;
 	    int num_steps_;
             int save_each_step_;

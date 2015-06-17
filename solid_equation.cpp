@@ -6,7 +6,7 @@
 
 using namespace TALYFEMLIB;
 
-SolidEquation::SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb) 
+SolidEquation::SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb)
  :idata(id), contact_bounds_(NULL) {
 }
 
@@ -62,8 +62,13 @@ void SolidEquation::fillEssBC() {
 void SolidEquation::Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
     //int mat_ind = fe.pElm->mat_ind();
-    NewtonBC bc = idata->get_bc(sideInd);
-    bc.calculate(fe, Ae, be, dt_);
+
+    NewtonBC* bc;
+    if(idata->get_bc(sideInd, bc)) {
+    	//std::cout << "NBC:" << sideInd << std::endl;
+    	bc->calculate(fe, Ae, be, dt_);
+    }
+
     /*double alpha = idata->heat_exchange_coeff();
     double Tamb = idata->ambient_temperature();
 
@@ -125,7 +130,7 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
     const double detJxW = fe.detJxW();
     double Tsr = compute_average_temp(fe, nbf);
     double Tpsr = compute_average_temp_prev(fe, nbf);
-    double Vsr = compute_average_velocity(fe, nbf);    
+    double Vsr = compute_average_velocity(fe, nbf);
     int mat_ind = fe.pElm->mat_ind();
     //TODO: Change to calculated values
     const SolidMaterial& material = idata->get_material(mat_ind);
@@ -166,7 +171,7 @@ void SolidEquation::Assemble(bool assemble_surface) {
 
     PetscErrorCode ierr;
     ierr = UpdateMatPreallocation(); //CHKERRQ(ierr);
-    
+
     // zero the stiffness matrix and load
     if (recalc_matrix_) { MatZeroEntries(Ag_); }
     // trying to do VecZeroEntries (bg_);
@@ -190,7 +195,7 @@ void SolidEquation::Assemble(bool assemble_surface) {
       ierr = MatAssemblyEnd(*p_Ag_, MAT_FLUSH_ASSEMBLY); //CHKERRQ(ierr);
     }
     ierr = VecAssemblyBegin(*p_bg_); //CHKERRQ(ierr);
-    ierr = VecAssemblyEnd(*p_bg_); //CHKERRQ(ierr);    
+    ierr = VecAssemblyEnd(*p_bg_); //CHKERRQ(ierr);
 
     //return 0;
 }
@@ -320,7 +325,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 
 				if (has_per_bc_.get(gid)) {
 					int lclnodeID = fe.pElm->node_id_array(i);
-					
+
 					int newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
 					// we don't want this to override an essential condition
 					if (!has_ess_bc_.get(gid)) {
