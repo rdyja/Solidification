@@ -42,6 +42,20 @@ bool SolidInputData::recognize_newton_bc(const MapConf& conf) {
     return true;
 }
 
+bool SolidInputData::recognize_contact_bc(const MapConf& conf) {
+    double kappa;
+
+    std::string name = recognize_name(conf);
+    if (!ReadValue(conf, "kappa", kappa)) {
+        return false;
+    }
+
+	ContactBC bc(kappa, name);
+	contact_conditions_coeff_.push_back(std::move(bc));
+
+return true;
+}
+
 std::string SolidInputData::recognize_name(const MapConf& conf) {
     std::string name;
 
@@ -54,18 +68,6 @@ std::string SolidInputData::recognize_name(const MapConf& conf) {
         throw std::string("Invalid material name");
 
     return name;
-}
-
-bool SolidInputData::recognize_contact_bc(const MapConf& conf) {
-    double kappa;
-
-    std::string name = recognize_name(conf);
-
-     if (!ReadValue(conf, "kappa", kappa)) {
-        return false;
-    }
-
-    return true;
 }
 
 bool SolidInputData::set_casting_properties(const MapConf& conf, SolidMaterial& solid_material) {
@@ -302,21 +304,29 @@ void SolidInputData::find_maping_materials(const TALYFEMLIB::GRID& grid) {
     //std::map<std::string, int> reverse_map_bc;
 
     for(unsigned i = 0; i < boundary_conditions_coeff_.size(); ++i) {
-    	//std::cout << "BCName:" << boundary_conditions_coeff_[i].name() << std::endl;
+//    	std::cout << "BCName:" << boundary_conditions_coeff_[i].name() << std::endl;
         reverse_map[boundary_conditions_coeff_[i].name()] = i;
+    }
+    for(unsigned i = 0; i < contact_conditions_coeff_.size(); ++i) {
+//    	std::cout << "CCName:" << contact_conditions_coeff_[i].name() << std::endl;
+        reverse_map[contact_conditions_coeff_[i].name()] = i;
     }
 
     for(auto iter = grid.material_desc_.begin(); iter != grid.material_desc_.end(); ++iter) {
         std::string  material_tag = iter->second.tag;
     	auto iter_mat = reverse_map.find(material_tag);
     	if(iter_mat != reverse_map.end()) {
+
     		int real_ind = iter_mat->second;
-    		if(iter->second.type == TALYFEMLIB::TYPE_MATERIAL::VOLUME) {
-    			//std::cout << "Index material:" << real_ind << std::endl;
+    		if (iter->second.type == TALYFEMLIB::TYPE_MATERIAL::VOLUME) {
+//    			std::cout << "Index material:" << real_ind << std::endl;
     			map_materials_[iter->first] = real_ind;
-    		} else {
-    			//std::cout << "Index bc:" << real_ind << std::endl;
+    		} else if (material_tag.find("_3R_") != std::string::npos) { // else { //else if (....) {
+//    			std::cout << "Index bc:" << real_ind << std::endl;
     			map_bc_[iter->first] = real_ind;
+    		}  else {
+//    			std::cout << "Index contact:" << real_ind << std::endl;
+    			map_contact_[iter->first] = real_ind;
     		}
     	}
         else {

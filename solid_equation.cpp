@@ -89,7 +89,7 @@ void SolidEquation::Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
     }*/
 
 }
-
+/*
 bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
 		TALYFEMLIB::ZEROARRAY<double>& be) {
@@ -109,15 +109,24 @@ bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
             	Ae2(a,b) += -kappa * M/dt_;
             }
         }
-
-//        for (int i = 0; i < nbf; i++) {
-//        	for (int j = 0; j < nbf; j++) {
-//        		PetscPrintf(PETSC_COMM_WORLD, "%g\t", Ae1(i, j));
-//        	}
-//        	PetscPrintf(PETSC_COMM_WORLD, "\n");
-//        }
-
         return true;
+
+    } else {
+    	return false;
+
+    }
+
+}
+*/
+
+bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
+		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
+		TALYFEMLIB::ZEROARRAY<double>& be) {
+
+	ContactBC* bc;
+	if (idata->get_bc(sideInd, bc)) {
+		bc->calculate(fe, Ae1, Ae2, be, dt_);
+		return true;
     } else {
     	return false;
     }
