@@ -1,8 +1,11 @@
 #include <cassert>
 #include <map>
 #include <Grid/material.h>
+#include <Utils/Utils.h>
 #include "solid_input_data.hpp"
 #include "extended_input.hpp"
+
+using namespace TALYFEMLIB;
 
 int SolidInputData::recognize_solid_model(const std::string& model) {
     std::string types[] = {"EQUILIBRIUM", "SCHEIL", "INDIRECT"};
@@ -238,16 +241,13 @@ bool SolidInputData::recognize_material(const MapConf& conf) {
 }
 
 bool SolidInputData::ReadFromFile(const std::string& fileName) {
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     std::map<std::string, std::string> conf;
     std::vector<MapConf> groupConfs;
     jaz::ConfigFile cf;
 
     if (!read_config_file(fileName, conf, groupConfs)) {
-        if(rank == 0)
-            std::cerr << "Config file error ";// << cf.error() << std::endl;
+        PrintError("Config file error");
         return false;
     }
 
@@ -321,7 +321,7 @@ void SolidInputData::find_maping_materials(const TALYFEMLIB::GRID& grid) {
     		if (iter->second.type == TALYFEMLIB::TYPE_MATERIAL::VOLUME) {
 //    			std::cout << "Index material:" << real_ind << std::endl;
     			map_materials_[iter->first] = real_ind;
-    		} else if (material_tag.find("_3R_") != std::string::npos) { // else { //else if (....) {
+    		} else if (material_tag.find("_3R_") != std::string::npos) {
 //    			std::cout << "Index bc:" << real_ind << std::endl;
     			map_bc_[iter->first] = real_ind;
     		}  else {
@@ -330,8 +330,8 @@ void SolidInputData::find_maping_materials(const TALYFEMLIB::GRID& grid) {
     		}
     	}
         else {
-            std::cerr << "Warning: Material:" << material_tag << " not found" << std::endl;
-            std::cerr << "Perhaps, missing \" (quotes) in material property name" << std::endl;
+        	PrintError("Warning: Material:", material_tag, " not found");
+        	PrintError("Perhaps missing \" (quotes) in material property name");
         }
     }
 }

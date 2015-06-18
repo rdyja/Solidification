@@ -61,63 +61,13 @@ void SolidEquation::fillEssBC() {
 
 void SolidEquation::Integrands4side(const TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) {
-    //int mat_ind = fe.pElm->mat_ind();
 
     NewtonBC* bc;
     if(idata->get_bc(sideInd, bc)) {
-    	//std::cout << "NBC:" << sideInd << std::endl;
     	bc->calculate(fe, Ae, be, dt_);
     }
 
-    /*double alpha = idata->heat_exchange_coeff();
-    double Tamb = idata->ambient_temperature();
-
-//    if (sideInd >= 1 && sideInd <= 6) { //we need to decide which indicators are for the 3rd type BC
-    if (sideInd == 22) { //we need to decide which indicators are for the 3rd type BC
-        int nbf = fe.pElm->n_nodes();
-        double detSideJxW = fe.detJxW();
-        for (int a = 0; a < nbf; ++a) {
-
-        	for(int b = 0; b < nbf; ++b) {
-                Ae(a,b) += alpha * fe.N(a)*fe.N(b)*detSideJxW/dt_;
-            }
-
-            double M = fe.N(a) * detSideJxW;
-            be(a) += alpha * Tamb * M/dt_;
-        }
-
-    }*/
-
 }
-/*
-bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
-		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
-		TALYFEMLIB::ZEROARRAY<double>& be) {
-
-//    if (sideInd >= 7 && sideInd <= 9) { //we need to decide which indicators are for the 4th type BC
-	if (sideInd == 3) { //we need to decide which indicators are for the 4th type BC
-        int nbf = fe.pElm->n_nodes();
-        double detSideJxW = fe.detJxW();
-        double kappa = 1000.0;
-//        PrintInfo("detSideJxW = ", detSideJxW);
-
-        for (int a = 0; a < nbf; ++a) {
-            for (int b = 0; b < nbf; ++b) {
-            	double M = fe.N(a) * fe.N(b) * detSideJxW;
-//            	PrintInfo("a,b = M - ", a, " ", b, " ", M, " ", fe.N(a), " ", fe.N(b));
-            	Ae1(a,b) += kappa * M/dt_;
-            	Ae2(a,b) += -kappa * M/dt_;
-            }
-        }
-        return true;
-
-    } else {
-    	return false;
-
-    }
-
-}
-*/
 
 bool SolidEquation::Integrands4contact(TALYFEMLIB::FEMElm& fe, int sideInd,
 		TALYFEMLIB::ZeroMatrix<double>& Ae1, TALYFEMLIB::ZeroMatrix<double>& Ae2,
@@ -171,8 +121,6 @@ void SolidEquation::InitializeContactBC(ContactBounds* cb) {
 	for (int i = 0; i < p_grid_->n_nodes(); i++) {
 		for (int k = 0; k < n_dof_; k++) { // TODO: not all DOFs have contact BC
 			has_contact_bc_.set(i*n_dof_ + k, contact_bounds_->IsNodePeriodic(i));
-//			PrintInfo("i: ", i*n_dof_ + k, " is_node_periodic: ", contact_bounds_->IsNodePeriodic(i),
-//					" has_contact_bc_.get() ", has_contact_bc_.get(i*n_dof_ + k));
 		}
 	}
 }
@@ -180,35 +128,43 @@ void SolidEquation::InitializeContactBC(ContactBounds* cb) {
 void SolidEquation::Assemble(bool assemble_surface) {
 //	PrintInfo("Assemble from SolidEquation");
 
-    PetscErrorCode ierr;
-    ierr = UpdateMatPreallocation(); //CHKERRQ(ierr);
+	try {
+		PetscErrorCode ierr;
+		ierr = UpdateMatPreallocation(); CHKERRV(ierr);
 
-    // zero the stiffness matrix and load
-    if (recalc_matrix_) { MatZeroEntries(Ag_); }
-    // trying to do VecZeroEntries (bg_);
-    PetscInt nlocal;
-    double *array;
-    VecGetLocalSize(bg_, &nlocal);
-    VecGetArray(bg_, &array);
-    memset(array, 0, sizeof(double)*nlocal);
-    VecRestoreArray(bg_, &array);
+		// zero the stiffness matrix and load
+		if (recalc_matrix_) { MatZeroEntries(Ag_); }
+		// trying to do VecZeroEntries (bg_);
+		PetscInt nlocal;
+		double *array;
+		VecGetLocalSize(bg_, &nlocal);
+		VecGetArray(bg_, &array);
+		memset(array, 0, sizeof(double)*nlocal);
+		VecRestoreArray(bg_, &array);
 
-    if (has_uniform_mesh_) {
-      AssembleVolumeUniformMesh(assemble_surface);
-    } else {
-      AssembleVolume(assemble_surface);
-    }
-    if (assemble_surface) {
-      AssembleSurface();
-    }
-    if (recalc_matrix_) {
-      ierr = MatAssemblyBegin(*p_Ag_, MAT_FLUSH_ASSEMBLY); //CHKERRQ(ierr);
-      ierr = MatAssemblyEnd(*p_Ag_, MAT_FLUSH_ASSEMBLY); //CHKERRQ(ierr);
-    }
-    ierr = VecAssemblyBegin(*p_bg_); //CHKERRQ(ierr);
-    ierr = VecAssemblyEnd(*p_bg_); //CHKERRQ(ierr);
+		if (has_uniform_mesh_) {
+		  AssembleVolumeUniformMesh(assemble_surface);
+		} else {
+		  AssembleVolume(assemble_surface);
+		}
+		if (assemble_surface) {
+		  AssembleSurface();
+		}
+		if (recalc_matrix_) {
+		  ierr = MatAssemblyBegin(*p_Ag_, MAT_FLUSH_ASSEMBLY); CHKERRV(ierr);
+		  ierr = MatAssemblyEnd(*p_Ag_, MAT_FLUSH_ASSEMBLY); CHKERRV(ierr);
+		}
+		ierr = VecAssemblyBegin(*p_bg_); CHKERRV(ierr);
+		ierr = VecAssemblyEnd(*p_bg_); CHKERRV(ierr);
 
-    //return 0;
+    } catch (TALYException& e) {
+      // if an exception was thrown (by the error handler or otherwise),
+      // we need to pop the error handler on the way up the stack
+      PetscPopErrorHandler();
+      throw e;
+    }
+
+    PetscPopErrorHandler();
 }
 
 void SolidEquation::AssembleVolume(bool assemble_surface) {
