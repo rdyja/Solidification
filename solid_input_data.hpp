@@ -32,6 +32,7 @@ class SolidInputData : public TALYFEMLIB::InputData {
 			return time_log_stop_;
 		}
 		double initial_temperature(int ind = 0) const {
+//			TALYFEMLIB::PrintInfo("initial_temperature ind: ", ind);
 			int mat_ind = map_materials_.find(ind)->second;
 			return solid_materials_[mat_ind].initial_temperature();
 		}

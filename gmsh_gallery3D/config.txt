@@ -1,0 +1,81 @@
+# Config file
+
+nsd = 3
+ifBoxGrid = 0
+orderOfBF = 1
+ifDD = 0
+#gridFile = simple2.msh
+gridFile = gallery3D.msh
+
+Lx = 0.1 #
+Ly = 0.1 #
+Lz = 0.1 #
+Nelemx = 10 #
+Nelemy = 10 #
+Nelemz = 10 #
+
+numberOfSteps = 100
+dt = 0.025
+saveEachStep = 1
+timeLogStart = 0
+timeLogStop = 0
+{
+name = "ODLEW"
+type = material
+solid_model = INDIRECT
+enthalpy_model = LINEAR_ENTHALPY_TYPE
+isCasting = 1
+T0 = 960
+lambdaS = 262
+lambdaL = 104
+rhoS = 2824
+rhoL = 2498
+cS = 1077
+cL = 1275
+Tp = 933
+Te = 821
+Ts = 853
+Tl = 926
+L = 390000
+#indirect model
+maxGrainSize = 0.001
+coeffBF = 4.6E-10
+}
+{
+name = "FORMA"
+type = material
+solid_model = INDIRECT
+enthalpy_model = LINEAR_ENTHALPY_TYPE
+isCasting = 0
+T0 = 660
+lambdaS = 40
+lambdaL = 0
+rhoS = 7500
+rhoL = 0
+cS = 620
+cL = 0
+Tp = 0
+Te = 0
+Ts = 0
+Tl = 0
+L = 0
+#indirect model
+maxGrainSize = 0
+coeffBF = 0
+}
+
+
+
+#boundary conditions
+{
+name = "WB_3R_FORMA"
+type = bc
+alpha = 10
+Tamb = 400
+}
+{
+name = "WB_4R_ODLEW"
+type = bc
+kappa = 1000
+}
+

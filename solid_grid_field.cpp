@@ -5,6 +5,7 @@
 using namespace TALYFEMLIB;
 
 void SolidGridField::SetIC(int nsd) {
+	/*
     for(int nodeID = 0; nodeID < p_grid_->n_nodes(); nodeID++) {
         SolidNodeData* pData = &(Node(nodeID));
         if (nsd == 3) {
@@ -12,9 +13,25 @@ void SolidGridField::SetIC(int nsd) {
             ELEM *elem = p_grid_->elm_array_[elem_id];
             int mat_ind = elem->mat_ind();
             pData->set_curr_temp(inputData_.initial_temperature(mat_ind));
+            PrintInfo("SolidGridField::elem_id: ", elem_id);
         }
     }
     PrintStatusStream(std::cerr, "IC set ");
+    */
+    for(int elemID = 0; elemID < p_grid_->n_elements(); elemID++) {
+//        SolidNodeData* pData = &(Node(nodeID));
+//            int elem_id = p_grid_->node_array_[nodeID]->elem_id_;
+		ELEM *elem = p_grid_->elm_array_[elemID];
+		int mat_ind = elem->mat_ind();
+
+		for(int i = 0; i < elem->n_nodes(); i++) {
+			SolidNodeData* pData = &(Node(elem->node_id_array(i)));
+			pData->set_curr_temp(inputData_.initial_temperature(mat_ind));
+//			PrintInfo("SolidGridField::elem_id: ", elemID);
+		}
+	}
+
+
 }
 
 
