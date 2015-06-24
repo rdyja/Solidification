@@ -77,7 +77,7 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
                 sfln << resultFileNamePrefix << i << extension;
                 TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
             } else {
-                sfln << resultFileNamePrefix << i << "_" << rank << extension;
+                sfln << resultFileNamePrefix << rank << "_" << i << extension;
                 //data.printNodeData(sfln.str().c_str());
                 TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
             }
@@ -105,20 +105,7 @@ void readConfigFile(SolidInputData& inputData, GRID *& pGrid) {
 }
 
 ContactBounds* createContactBounds(SolidInputData& inputData, GRID *& pGrid) {
-
-	// prepare data (normally should be read from gmsh file)
-//	std::vector<PetscInt> pbc_indices_master = {
-//			1, 2, 5, 6, 20
-//			5, 6, 20
-//	};
-//	std::vector<PetscInt> pbc_indices_slave = {
-//			8, 11, 12, 15, 24
-//			12, 15, 24
-//	};
-
-    // set up periodic boundary object
     ContactBounds *pcb = new ContactBounds();
-//    pcb->LoadContactBounds(pGrid, pbc_indices_master, pbc_indices_slave);
     pcb->ImportContactBounds(pGrid);
     return pcb;
 }
@@ -147,11 +134,10 @@ int main(int argc, char** argv) {
 			int nOfDofPerNode = 1;	//< number of degree of freedom per node
 			solidEq.redimSolver (pGrid, nOfDofPerNode);
 			solidEq.setData( &data );
-			if (pcb)
-				solidEq.InitializeContactBC(pcb);
 
-			if (!inputData.ifBoxGrid && pcb)
-				data.SetBndrIndicator(*pcb);
+			if (pcb) {
+				solidEq.InitializeContactBC(pcb);
+			}
 //			pGrid->PrintElmSurfaceIndicator();
 
 			performCalculation(inputData, data, solidEq, rank);
