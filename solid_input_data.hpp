@@ -61,6 +61,7 @@ class SolidInputData : public TALYFEMLIB::InputData {
 	private:
 		int recognize_solid_model(const std::string&);
 		int recognize_enthalpy_model(const std::string& model);
+		int recognize_heatcapacity_model(const std::string& model);
 		bool recognize_newton_bc(const MapConf& conf);
 		bool recognize_contact_bc(const MapConf& conf);
 		bool recognize_material(const MapConf& grup);

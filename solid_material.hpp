@@ -13,6 +13,14 @@
 #include <map>
 #include <string>
 
+#include <Grid/femelm.h>
+#include <Grid/gridfield.h>
+
+const int MORGAN_HEAT_CAPACITY = 1;
+const int DELGUIDICE_HEAT_CAPACITY = 2;
+const int LEMMON_HEAT_CAPACITY = 3;
+const int COMMINI_HEAT_CAPACITY = 4;
+
 class MaterialProperty {
 		double param;
 	public:
@@ -25,12 +33,13 @@ class MaterialProperty {
 
 class EnthalpyModel;
 class SolidificationModel;
+class SolidNodeData;
 
 class SolidMaterial
 {
 public:
-  explicit SolidMaterial(int index = 0);  
-  
+  explicit SolidMaterial(int index = 0);
+
   double conductivity(double T = 0.0, double vT = -1.0) const;
   double specific_heat(double T = 0.0, double vT = -1.0) const;
   double density(double T = 0.0, double vT = -1.0) const;
@@ -43,13 +52,15 @@ public:
   double pure_melting_temperature() const;
   double latent_heat() const;
 
-  double heat_capacity(double T = 0.0, double T_p = 0.0, double vT = -1.0) const;
+  double heat_capacity(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::GridField<SolidNodeData>* p_data,
+		  double T = 0.0, double T_p = 0.0, double vT = -1.0) const;
   double enthalpy(double T, double vT = -1.0) const;
   std::string name() const;
 
   const SolidificationModel& get_solidification_model() const;
   void set_solidification_model(int model_id);
   void set_enthalpy_model(int model_id);
+  void set_heatcapacity_model(int id);
   void set_casting(bool casting);
   void set_name(std::string);
 
@@ -64,7 +75,7 @@ public:
   MaterialProperty get_property(int num) const;
   void set_property(const std::string&, double);
   void initialize_property_map();
-  
+
 private:
   std::unique_ptr<SolidificationModel> solidification_model_;
   std::unique_ptr<EnthalpyModel> enthalpy_model_;
@@ -75,6 +86,7 @@ private:
   double Tp_, Te_, maxGrainSize_, coeffBF_, sourceTerm_;
   bool isCasting_;
   std::string name_;
+  int heatcapacity_model_id_;
 };
 
 class SolidMaterialFactory

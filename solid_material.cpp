@@ -7,6 +7,7 @@
 #include "solid_material.hpp"
 #include "solid_model.hpp"
 #include "enthalpy_model.hpp"
+#include "solid_grid_field.hpp"
 
 #include <string>
 #include <stdexcept>
@@ -35,16 +36,16 @@ void SolidMaterial::initialize_property_map() {
     //properites["isCasting",
     properties["T0"] = &T0_;
     properties["sourceTerm"] = &sourceTerm_;
-    properties["Ts"] = &Ts_;    
+    properties["Ts"] = &Ts_;
     properties["Tl"] = &Tl_;
     properties["Te"] = &Te_;
     properties["Tp"] = &Tp_;
     properties["lambdaL"] = &lambdaL_;
     properties["cL"] = &cL_;
     properties["rhoL"] = &rhoL_;
-    properties["L"] = &L_;          
+    properties["L"] = &L_;
     properties["maxGrainSize"] = &maxGrainSize_;
-    properties["coeffBF"] = &coeffBF_;  
+    properties["coeffBF"] = &coeffBF_;
 }
 
 double SolidMaterial::grain_size(double vT) const
@@ -64,6 +65,12 @@ void SolidMaterial::set_enthalpy_model(int model_id)
 {
     enthalpy_model_ = unique_ptr<EnthalpyModel>(new EnthalpyModel(*this, *solidification_model_, model_id));
 }
+
+void SolidMaterial::set_heatcapacity_model(int model_id)
+{
+    heatcapacity_model_id_ = model_id;
+}
+
 
 double SolidMaterial::conductivity(double T, double vT) const
 {
@@ -135,17 +142,96 @@ double SolidMaterial::density(double T, double vT) const
   return 0;
 }
 
-double SolidMaterial::heat_capacity(double T, double T_p, double vT) const
+double SolidMaterial::heat_capacity(const TALYFEMLIB::FEMElm& fe,
+		TALYFEMLIB::GridField<SolidNodeData>* p_data, double T, double T_p, double vT) const
 {
   if (!is_casting()) return specific_heat(T)*density(T);
 
-  double TL = liquidus_temperature(), TS = solidification_model_->real_solidus_temperature(vT);
+  const double TL = liquidus_temperature();
+  const double TS = solidification_model_->real_solidus_temperature(vT);
+
   if (T < TS || T > TL) {
     return specific_heat(T, vT)*density(T, vT);
   }
 
   assert(enthalpy_model_.get() != NULL);
-  return (enthalpy_model_->enthalpy_in_mushy_zone(T, vT) - enthalpy_model_->enthalpy_in_mushy_zone(T_p, vT))/(T - T_p);
+
+  switch (heatcapacity_model_id_) {
+
+  case MORGAN_HEAT_CAPACITY: {
+
+	  const double H = enthalpy_model_->enthalpy_in_mushy_zone(T, vT);
+	  const double H_p = enthalpy_model_->enthalpy_in_mushy_zone(T_p, vT);
+
+  	  return (H - H_p)/(T - T_p);
+  }
+
+  case COMMINI_HEAT_CAPACITY: {
+	  const int nsd = fe.pElm->nsd();
+
+	  double sum = 0.0;
+	  for (int dir = 0; dir < nsd; dir++) {
+		for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
+            const int J = fe.pElm->ElemToLocalNodeID(a);
+            const double Tprev = p_data->Node(J).get_prev_temp();
+            const double Vprev = p_data->Node(J).get_velocity();
+            const double Hprev = enthalpy_model_->enthalpy_in_mushy_zone(Tprev, Vprev);
+
+            sum += (fe.dN(a, dir) * Hprev)/(fe.dN(a, dir) * Tprev);
+		}
+	  }
+
+  	  return sum/nsd;
+  }
+
+  case LEMMON_HEAT_CAPACITY: {
+	  const int nsd = fe.pElm->nsd();
+
+	  double sum_n_2 = 0.0, sum_d_2 = 0.0;
+	  for (int dir = 0; dir < nsd; dir++) {
+		double sum_n = 0.0, sum_d = 0.0;
+		for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
+            const int J = fe.pElm->ElemToLocalNodeID(a);
+            const double Tprev = p_data->Node(J).get_prev_temp();
+            const double Vprev = p_data->Node(J).get_velocity();
+            const double Hprev = enthalpy_model_->enthalpy_in_mushy_zone(Tprev, Vprev);
+
+			sum_n += fe.dN(a, dir) * Hprev;
+			sum_d += fe.dN(a, dir) * Tprev;
+		}
+		sum_n_2 += pow(sum_n, 2.0);
+		sum_d_2 += pow(sum_d, 2.0);
+	  }
+
+  	  return sqrt(sum_n_2/sum_d_2);
+  }
+
+  case DELGUIDICE_HEAT_CAPACITY: {
+	  const int nsd = fe.pElm->nsd();
+
+	  double sum_n_2 = 0.0, sum_d_2 = 0.0;
+	  for (int dir = 0; dir < nsd; dir++) {
+		double sum_n = 0.0, sum_d = 0.0;
+		for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
+            const int J = fe.pElm->ElemToLocalNodeID(a);
+            const double Tprev = p_data->Node(J).get_prev_temp();
+            const double Vprev = p_data->Node(J).get_velocity();
+            const double Hprev = enthalpy_model_->enthalpy_in_mushy_zone(Tprev, Vprev);
+
+            sum_n += fe.dN(a, dir) * Hprev * fe.dN(a, dir) * Tprev;
+			sum_d += fe.dN(a, dir) * Tprev;
+		}
+		sum_n_2 += sum_n;
+		sum_d_2 += pow(sum_d, 2.0);
+	  }
+
+  	  return sum_n_2/sum_d_2;
+  }
+
+  default:
+	  throw(std::string("Unknown heat capacity approximation type"));
+  }
+
 }
 
 double SolidMaterial::enthalpy(double T, double vT) const
@@ -228,15 +314,15 @@ MaterialProperty SolidMaterial::get_property(int num) const{
 		case 15:
 			return MaterialProperty(coeffBF_);
 	}
-	throw std::string("Reading wrong material property");	
+	throw std::string("Reading wrong material property");
 }
 
-void SolidMaterial::set_property(const string& propertyName, double value) {                    
-                        
+void SolidMaterial::set_property(const string& propertyName, double value) {
+
     if(properties.find(propertyName) == properties.end()) {
-        throw std::string("Setting wrong material property " + propertyName);	
+        throw std::string("Setting wrong material property " + propertyName);
     }
-    *properties[propertyName] = value;    
+    *properties[propertyName] = value;
 }
 
 void SolidMaterial::update_k() {

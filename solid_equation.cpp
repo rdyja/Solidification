@@ -28,7 +28,9 @@ void SolidEquation::Solve(double t, double dt) {
     }
 }
 
-double SolidEquation::compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf2) {
+	const int nbf = fe.pElm->n_nodes();
+
     double Vsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -37,7 +39,9 @@ double SolidEquation::compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int
     return Vsr /= nbf;
 }
 
-double SolidEquation::compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf2) {
+	const int nbf = fe.pElm->n_nodes();
+
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -46,7 +50,9 @@ double SolidEquation::compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf
     return Tsr /= nbf;
 }
 
-double SolidEquation::compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf) {
+double SolidEquation::compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf2) {
+	const int nbf = fe.pElm->n_nodes();
+
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
@@ -94,28 +100,14 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
     //TODO: Change to calculated values
     const SolidMaterial& material = idata->get_material(mat_ind);
     double lambda = material.conductivity(Tsr, Vsr);
-    double capacity = material.heat_capacity(Tsr, Tpsr, Vsr);
+    double capacity = material.heat_capacity(fe, p_data_, Tsr, Tpsr, Vsr);
     /*if(capacity != capacity)
         material.heat_capacity(Tsr, Tpsr, Vsr);*/
-    /*
-    for(int a=0; a< nbf; a++){
-	    for(int b=0; b < nbf; b++){
+    for (int a = 0; a < nbf; a++) {
+	    for (int b = 0; b < nbf; b++) {
 			double M = capacity * fe.N(a)*fe.N(b)*detJxW;
             double N = 0;
-            for(int k=0; k < nsd; k++){
-				N +=  lambda * fe.dN(a,k)*fe.dN(b,k)*detJxW;
-            }
-            Ae(a,b) += M/dt_ + N;
-            int J = fe.pElm->ElemToLocalNodeID(b);
-            be(a) += M/dt_*p_data_->Node(J).get_prev_temp();
-        }
-    }
-    */
-    for(int a=0; a< nbf; a++){
-	    for(int b=0; b < nbf; b++){
-			double M = capacity * fe.N(a)*fe.N(b)*detJxW;
-            double N = 0;
-            for(int k=0; k < nsd; k++){
+            for (int k = 0; k < nsd; k++) {
 				N +=  lambda * fe.dN(a,k)*fe.dN(b,k)*detJxW;
             }
             Ae(a,a) += M/dt_;

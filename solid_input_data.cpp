@@ -27,6 +27,20 @@ int SolidInputData::recognize_enthalpy_model(const std::string& model) {
     throw std::string("Invalid enthalpy model");
 }
 
+int SolidInputData::recognize_heatcapacity_model(const std::string& model) {
+    std::string types[] = {
+    		"MORGAN_HEAT_CAPACITY", "DELGUIDICE_HEAT_CAPACITY",
+			"LEMMON_HEAT_CAPACITY", "COMMINI_HEAT_CAPACITY"
+    };
+
+    for(int i = 0; i < 4; ++i) {
+        if(model == types[i])
+            return i + 1;
+    }
+    throw std::string("Invalid heat capacity approximation model");
+
+}
+
 bool SolidInputData::recognize_newton_bc(const MapConf& conf) {
     double alpha, Tamb;
     std::string name = recognize_name(conf);
@@ -212,6 +226,12 @@ bool SolidInputData::recognize_material(const MapConf& conf) {
     }
 
     solid_material.set_enthalpy_model(recognize_enthalpy_model(model));
+
+    if(!ReadValue(conf, "heatcapacity_model", model)) {
+        return false;
+    }
+
+    solid_material.set_heatcapacity_model(recognize_heatcapacity_model(model));
 
     int num;
 
