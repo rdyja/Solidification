@@ -1,0 +1,5 @@
+# An example of the makefile.config file. Copy it to makefile.config and
+# uncomment necessary variables.
+
+#FEMLIBPATH=${HOME}/Programming/Libraries/talyfem-solidification/soldification
+
