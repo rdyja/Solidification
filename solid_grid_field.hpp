@@ -11,7 +11,7 @@ public:
     }
 
     void SetIC(int);
-
+    void SetBndrIndicator(const TALYFEMLIB::ContactBounds& pcb);
 private:
     const SolidInputData& inputData_;
 };
