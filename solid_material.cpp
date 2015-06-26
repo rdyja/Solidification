@@ -18,10 +18,11 @@
 #include <fstream>
 #include <cstdlib>
 #include <cassert>
+#include <cmath>
 
 using namespace std;
 
-//static const char* MY_MATERIAL_TYPE = "NSC.Solidification.Material";
+const double DOUBLE_VERY_SMALL = 1E-16;
 
 SolidMaterial::SolidMaterial(int index)
 //: Material(MY_MATERIAL_TYPE, 16, m, 0)
@@ -168,64 +169,129 @@ double SolidMaterial::heat_capacity(const TALYFEMLIB::FEMElm& fe,
 
   case COMMINI_HEAT_CAPACITY: {
 	  const int nsd = fe.pElm->nsd();
+	  const int nnd = fe.pElm->n_nodes();
 
-	  double sum = 0.0;
-	  for (int dir = 0; dir < nsd; dir++) {
-		for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
-            const int J = fe.pElm->ElemToLocalNodeID(a);
-            const double Tprev = p_data->Node(J).get_prev_temp();
-            const double Vprev = p_data->Node(J).get_velocity();
-            const double Hprev = enthalpy_model_->enthalpy_in_mushy_zone(Tprev, Vprev);
+	  vector<double> Tprev(nnd), Vprev(nnd), Hprev(nnd);
+	  for (ElemNodeID a = 0; a < nnd; a++) {
+		  const int J = fe.pElm->ElemToLocalNodeID(a);
+		  Tprev[a] = p_data->Node(J).get_prev_temp();
+		  Vprev[a] = p_data->Node(J).get_velocity();
+		  Hprev[a] = enthalpy_model_->enthalpy_in_mushy_zone(Tprev[a], Vprev[a]);
+	  }
 
-            sum += (fe.dN(a, dir) * Hprev)/(fe.dN(a, dir) * Tprev);
+	  bool diff = true;
+	  for (ElemNodeID a = 0; a < nnd; a++) {
+		  if (fabs(Tprev[a] - Tprev[a == nnd - 1 ? 0 : a + 1]) < DOUBLE_VERY_SMALL) {
+			  diff = false;
+			  break;
+		  }
+	  }
+
+	  if (diff) {
+		double sum = 0.0;
+		for (int dir = 0; dir < nsd; dir++) {
+			double sum_n = 0.0, sum_d = 0.0;
+			for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
+				sum_n += (fe.dN(a, dir) * Hprev[a]);
+				sum_d += (fe.dN(a, dir) * Tprev[a]);
+			}
+			sum += sum_n/sum_d;
+		}
+		return sum/nsd;
+
+	  } else {
+		if (fabs(Tprev[0]) < DOUBLE_VERY_SMALL) {
+			return specific_heat(T, vT)*density(T, vT);
+		} else {
+			return Hprev[0]/Tprev[0] ;
 		}
 	  }
 
-  	  return sum/nsd;
+
+
   }
 
   case LEMMON_HEAT_CAPACITY: {
 	  const int nsd = fe.pElm->nsd();
+	  const int nnd = fe.pElm->n_nodes();
 
-	  double sum_n_2 = 0.0, sum_d_2 = 0.0;
-	  for (int dir = 0; dir < nsd; dir++) {
-		double sum_n = 0.0, sum_d = 0.0;
-		for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
-            const int J = fe.pElm->ElemToLocalNodeID(a);
-            const double Tprev = p_data->Node(J).get_prev_temp();
-            const double Vprev = p_data->Node(J).get_velocity();
-            const double Hprev = enthalpy_model_->enthalpy_in_mushy_zone(Tprev, Vprev);
-
-			sum_n += fe.dN(a, dir) * Hprev;
-			sum_d += fe.dN(a, dir) * Tprev;
-		}
-		sum_n_2 += pow(sum_n, 2.0);
-		sum_d_2 += pow(sum_d, 2.0);
+	  vector<double> Tprev(nnd), Vprev(nnd), Hprev(nnd);
+	  for (ElemNodeID a = 0; a < nnd; a++) {
+		  const int J = fe.pElm->ElemToLocalNodeID(a);
+		  Tprev[a] = p_data->Node(J).get_prev_temp();
+		  Vprev[a] = p_data->Node(J).get_velocity();
+		  Hprev[a] = enthalpy_model_->enthalpy_in_mushy_zone(Tprev[a], Vprev[a]);
 	  }
 
-  	  return sqrt(sum_n_2/sum_d_2);
+	  bool diff = true;
+	  for (ElemNodeID a = 0; a < nnd; a++) {
+		  if (fabs(Tprev[a] - Tprev[a == nnd - 1 ? 0 : a + 1]) < DOUBLE_VERY_SMALL) {
+			  diff = false;
+			  break;
+		  }
+	  }
+	  if (diff) {
+		  double sum_n_2 = 0.0, sum_d_2 = 0.0;
+		  for (int dir = 0; dir < nsd; dir++) {
+			double sum_n = 0.0, sum_d = 0.0;
+			for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
+				sum_n += fe.dN(a, dir) * Hprev[a];
+				sum_d += fe.dN(a, dir) * Tprev[a];
+			}
+			sum_n_2 += pow(sum_n, 2.0);
+			sum_d_2 += pow(sum_d, 2.0);
+		  }
+		  return sqrt(sum_n_2/sum_d_2);
+
+  	  } else {
+  		if (fabs(Tprev[0]) < DOUBLE_VERY_SMALL) {
+  			return specific_heat(T, vT)*density(T, vT);
+  		} else {
+  			return Hprev[0]/Tprev[0] ;
+  		}
+  	  }
   }
 
   case DELGUIDICE_HEAT_CAPACITY: {
 	  const int nsd = fe.pElm->nsd();
+	  const int nnd = fe.pElm->n_nodes();
 
-	  double sum_n_2 = 0.0, sum_d_2 = 0.0;
-	  for (int dir = 0; dir < nsd; dir++) {
-		double sum_n = 0.0, sum_d = 0.0;
-		for (ElemNodeID a = 0; a < fe.pElm->n_nodes(); a++) {
-            const int J = fe.pElm->ElemToLocalNodeID(a);
-            const double Tprev = p_data->Node(J).get_prev_temp();
-            const double Vprev = p_data->Node(J).get_velocity();
-            const double Hprev = enthalpy_model_->enthalpy_in_mushy_zone(Tprev, Vprev);
-
-            sum_n += fe.dN(a, dir) * Hprev * fe.dN(a, dir) * Tprev;
-			sum_d += fe.dN(a, dir) * Tprev;
-		}
-		sum_n_2 += sum_n;
-		sum_d_2 += pow(sum_d, 2.0);
+	  vector<double> Tprev(nnd), Vprev(nnd), Hprev(nnd);
+	  for (ElemNodeID a = 0; a < nnd; a++) {
+		  const int J = fe.pElm->ElemToLocalNodeID(a);
+		  Tprev[a] = p_data->Node(J).get_prev_temp();
+		  Vprev[a] = p_data->Node(J).get_velocity();
+		  Hprev[a] = enthalpy_model_->enthalpy_in_mushy_zone(Tprev[a], Vprev[a]);
 	  }
 
-  	  return sum_n_2/sum_d_2;
+	  bool diff = true;
+	  for (ElemNodeID a = 0; a < nnd; a++) {
+		  if (fabs(Tprev[a] - Tprev[a == nnd - 1 ? 0 : a + 1]) < DOUBLE_VERY_SMALL) {
+			  diff = false;
+			  break;
+		  }
+	  }
+
+	  if (diff) {
+		double sum_n_2 = 0.0, sum_d_2 = 0.0;
+		for (int dir = 0; dir < nsd; dir++) {
+			double sum_n = 0.0, sum_d = 0.0;
+			for (ElemNodeID a = 0; a < nnd; a++) {
+				sum_n += fe.dN(a, dir) * Hprev[a] * fe.dN(a, dir) * Tprev[a];
+				sum_d += fe.dN(a, dir) * Tprev[a] * fe.dN(a, dir) * Tprev[a];
+			}
+			sum_n_2 += sum_n;
+			sum_d_2 += sum_d;
+		}
+		return sum_n_2/sum_d_2;
+
+	  } else {
+		if (fabs(Tprev[0]) < DOUBLE_VERY_SMALL) {
+			return specific_heat(T, vT)*density(T, vT);
+		} else {
+			return Hprev[0]/Tprev[0] ;
+		}
+	  }
   }
 
   default:

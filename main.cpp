@@ -24,7 +24,8 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         fe.refill(data.p_grid_, i);
         //fe.setRelativeOrder(inputData.orderOfBF);
 
-        const SolidMaterial& mat = inputData.get_material();
+        int mat_ind = fe.pElm->mat_ind();
+        const SolidMaterial& mat = inputData.get_material(mat_ind);
 
         if (mat.is_casting())
             for (int j = 0; j < fe.pElm->n_nodes(); ++j) {

@@ -15,6 +15,7 @@
 
 class SolidInputData : public TALYFEMLIB::InputData {
 	public:
+		SolidInputData() { solid_materials_.reserve(10); }
 	    bool ReadFromFile(const std::string& fileName = "config.txt");
 	    int num_steps() const {
 			return num_steps_;
