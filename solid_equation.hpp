@@ -36,22 +36,22 @@ class SolidEquation
 
         // redefined methods from base class in order to add contact BC
         virtual void Assemble(bool assemble_surface = true);
-        virtual void AssembleVolume(bool assemble_surface = true); 
-        
-        
+        virtual void AssembleVolume(bool assemble_surface = true);
+
+        void compute_additional_values();
+
     private:
         SolidInputData* idata;
         TALYFEMLIB::ContactBounds* contact_bounds_;
         TALYFEMLIB::ZEROARRAY<bool> has_contact_bc_;
-        
-        void compute_additional_values();
+
         void compute_solid_fraction();
         void compute_real_solidus_temperature();
         void compute_grain_size();
         void compute_heat_flux();
         double compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf);
         double compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf);
-        double compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf);        
+        double compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf);
 };
 
 #endif

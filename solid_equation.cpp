@@ -338,16 +338,16 @@ void SolidEquation::compute_additional_values() {
 void SolidEquation::compute_solid_fraction() {
     for(int elemID = 0; elemID < p_grid_->n_elements(); elemID++) {
         ELEM *elem = p_grid_->elm_array_[elemID];
-	int mat_ind = elem->mat_ind();
+        int mat_ind = elem->mat_ind();
 
-	for(int i = 0; i < elem->n_nodes(); i++) {            
-            SolidMaterial& solid_material = idata->get_material(mat_ind);
-            SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
-            double v = pData->get_velocity();
-            double Twe = pData->get_t_with_eutectic();
-            double fs = solid_material.get_solidification_model().solid_phase_fraction(Twe, v);            
-            pData->set_solid_fraction(fs);
-	}
+		for(int i = 0; i < elem->n_nodes(); i++) {
+			SolidMaterial& solid_material = idata->get_material(mat_ind);
+			SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
+			double v = pData->get_velocity();
+			double Twe = pData->get_prev_temp();
+			double fs = solid_material.get_solidification_model().solid_phase_fraction(Twe, v);
+			pData->set_solid_fraction(fs);
+		}
     }
 }
 
@@ -356,7 +356,7 @@ void SolidEquation::compute_real_solidus_temperature() {
         ELEM *elem = p_grid_->elm_array_[elemID];
 	int mat_ind = elem->mat_ind();
 
-	for(int i = 0; i < elem->n_nodes(); i++) {            
+	for(int i = 0; i < elem->n_nodes(); i++) {
             SolidMaterial& solid_material = idata->get_material(mat_ind);
             SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
             double v = pData->get_velocity();
@@ -367,12 +367,12 @@ void SolidEquation::compute_real_solidus_temperature() {
 }
 
 void SolidEquation::compute_grain_size() {
-    for(int elemID = 0; elemID < p_grid_->n_elements(); elemID++) {        
+    for(int elemID = 0; elemID < p_grid_->n_elements(); elemID++) {
         ELEM *elem = p_grid_->elm_array_[elemID];
 	int mat_ind = elem->mat_ind();
 
-	for(int i = 0; i < elem->n_nodes(); i++) {            
-            SolidMaterial& solid_material = idata->get_material(mat_ind);            
+	for(int i = 0; i < elem->n_nodes(); i++) {
+            SolidMaterial& solid_material = idata->get_material(mat_ind);
             SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
             double v = pData->get_velocity();
             double rz = solid_material.grain_size(v);
@@ -382,7 +382,7 @@ void SolidEquation::compute_grain_size() {
 }
 
 void SolidEquation::compute_heat_flux() {
-    for(int elemID = 0; elemID < p_grid_->n_elements(); elemID++) {        
+    for(int elemID = 0; elemID < p_grid_->n_elements(); elemID++) {
     }
 }
 

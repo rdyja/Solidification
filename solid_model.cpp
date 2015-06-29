@@ -30,6 +30,7 @@ double SolidificationModel::solid_phase_fraction(double T, double vT) const
     case EQUILIBRIUM_SOLIDIFICATION_TYPE:
         if (T < TS) return 1.0;
         else return equilibrium_solid_phase_fraction(T);
+
         break;
 
     case SCHEIL_SOLIDIFICATION_TYPE: {

@@ -45,13 +45,13 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
 }
 
 void detect_eutectic_solidification(SolidInputData& inputData, SolidGridField& data)
-{ 
+{
     int ne = data.p_grid_->n_elements();
     for(int elemID = 0; elemID < ne; ++elemID) {
         ELEM *elem = data.p_grid_->elm_array_[elemID];
         int mat_ind = elem->mat_ind();
 
-	for(int i = 0; i < elem->n_nodes(); i++) {            
+	for(int i = 0; i < elem->n_nodes(); i++) {
             SolidMaterial& solid_material = inputData.get_material(mat_ind);
             SolidNodeData* pData = &data.Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
             double Twe = solid_material.get_solidification_model().real_solidus_temperature(pData->get_velocity());
@@ -90,15 +90,14 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
         PrintStatus("(", t, ") time stepping completed! ", rank);
         //cout << sfln.str().c_str() << endl;
         if (i%save == 0 && !((logStop - logStart) > 0)) {
-            if (inputData.ifBoxGrid) {
-                sfln << resultFileNamePrefix << i << extension;
-                TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
-            } else {
-                sfln << resultFileNamePrefix << i << "_" << rank << extension;
-                //data.printNodeData(sfln.str().c_str());
-                TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
-            }
-            sfln.str(std::string());
+
+			detect_eutectic_solidification(inputData, data);
+			solidEq.compute_additional_values();
+			sfln << resultFileNamePrefix << rank << "_" << i << extension;
+			//data.printNodeData(sfln.str().c_str());
+			TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
+
+			sfln.str(std::string());
         }
         if (i == logStop - 1) timeLogger.stop();
     }
