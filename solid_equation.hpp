@@ -49,6 +49,7 @@ class SolidEquation
         void compute_real_solidus_temperature();
         void compute_grain_size();
         void compute_heat_flux();
+        void compute_capprox();
         double compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf);
         double compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf);
         double compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf);

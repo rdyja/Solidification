@@ -333,6 +333,7 @@ void SolidEquation::compute_additional_values() {
     compute_real_solidus_temperature();
     compute_grain_size();
     compute_heat_flux();
+    compute_capprox();
 }
 
 void SolidEquation::compute_solid_fraction() {
@@ -378,6 +379,30 @@ void SolidEquation::compute_grain_size() {
             double rz = solid_material.grain_size(v);
             pData->set_grain_size(rz);
 	}
+    }
+}
+
+void SolidEquation::compute_capprox() {
+    for(int elemID = 0; elemID < p_grid_->n_elements(); elemID++) {
+        ELEM *elem = p_grid_->elm_array_[elemID];
+
+        FEMElm fe;
+        fe.refill(p_grid_, elemID);
+        fe.setRelativeOrder(0);
+        fe.initNumItg();
+
+        int mat_ind = elem->mat_ind();
+        SolidMaterial& material = idata->get_material(mat_ind);
+
+		for(int i = 0; i < elem->n_nodes(); i++) {
+			SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));
+			double v = pData->get_velocity();
+			double T = pData->get_prev_temp();
+			double Tprev = pData->get_prev_minus_1_temp();
+			double capacity = material.heat_capacity(fe, p_data_, T, Tprev, v);
+
+			pData->set_capprox(capacity);
+		}
     }
 }
 

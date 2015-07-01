@@ -29,6 +29,8 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
                         return flux_z;
                     case 10:
                         return twe;
+                    case 11:
+                        return capprox;
                 }
                 throw std::string("Wrong node value");
             }
@@ -56,6 +58,8 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
                         return flux_z;
                     case 10:
                         return twe;
+                    case 11:
+                        return capprox;
                 }
                 throw std::string("Wrong node value");
             }
@@ -83,6 +87,8 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
                         return "fluxZ";
                     case 10:
                         return "T_with_eutectic";
+                    case 11:
+                        return "c_approx";
                 }
                 throw std::string("Wrong node value");
             }
@@ -108,41 +114,49 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
            double get_velocity() const {
                return v;
            }
-           
+
            double get_solid_fraction() const {
                return fs;
            }
-           
+
            void set_solid_fraction(double newVal) {
                fs = newVal;
            }
-           
+
            double get_real_solidus_temperature() const {
                return ts;
            }
-           
+
            void set_real_solidus_temperature(double newVal) {
                ts = newVal;
            }
-           
+
            double get_grain_size() const {
                return rz;
            }
-           
+
            void set_grain_size(double newVal) {
                rz = newVal;
            }
-           
+
            double get_t_with_eutectic() const {
                return twe;
            }
-           
+
            void set_t_with_eutectic(double newVal) {
                twe = newVal;
            }
-           
+
+           double get_capprox() const {
+               return capprox;
+           }
+
+           void set_capprox(double newVal) {
+               capprox = newVal;
+           }
+
            static int valueno() {
-               return 11;
+               return 12;
            }
            void UpdateDataStructures() {
                t2 = t1;
@@ -150,7 +164,7 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
            }
 
         private:
-            double t0, t1, t2, twe, v, fs, ts, rz, flux_x, flux_y, flux_z;
+            double t0, t1, t2, twe, v, fs, ts, rz, flux_x, flux_y, flux_z, capprox;
 };
 
 #endif
