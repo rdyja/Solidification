@@ -101,10 +101,11 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
     const SolidMaterial& material = idata->get_material(mat_ind);
     double lambda = material.conductivity(Tsr, Vsr);
     double capacity = material.heat_capacity(fe, p_data_, Tsr, Tpsr, Vsr);
-//    if (mat_ind == 1)
-//    	PrintInfo("heat_capacity: ", capacity, " mat: ", mat_ind);
-    /*if(capacity != capacity)
-        material.heat_capacity(Tsr, Tpsr, Vsr);*/
+//    if(capacity != capacity) {
+//        material.heat_capacity(fe, p_data_, Tsr, Tpsr, Vsr);
+//        PrintError("SolidEquation::Integrands -> capacity != capacity");
+//    }
+
     for (int a = 0; a < nbf; a++) {
 	    for (int b = 0; b < nbf; b++) {
 			double M = capacity * fe.N(a)*fe.N(b)*detJxW;
@@ -117,6 +118,7 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
             int J = fe.pElm->ElemToLocalNodeID(b);
             be(a) += M/dt_*p_data_->Node(J).get_prev_temp();
         }
+	    p_data_->Node(fe.pElm->ElemToLocalNodeID(a)).set_capprox(capacity);
     }
 }
 
@@ -333,7 +335,7 @@ void SolidEquation::compute_additional_values() {
     compute_real_solidus_temperature();
     compute_grain_size();
     compute_heat_flux();
-    compute_capprox();
+//    compute_capprox();
 }
 
 void SolidEquation::compute_solid_fraction() {
@@ -391,15 +393,28 @@ void SolidEquation::compute_capprox() {
         fe.setRelativeOrder(0);
         fe.initNumItg();
 
-        int mat_ind = elem->mat_ind();
-        SolidMaterial& material = idata->get_material(mat_ind);
+        const int nbf = fe.pElm->n_nodes();
+        double Tsr = compute_average_temp(fe, nbf);
+        double Tpsr = compute_average_temp_prev(fe, nbf);
+        double Vsr = compute_average_velocity(fe, nbf);
+
+        int mat_ind = fe.pElm->mat_ind();
+//        int mat_ind = elem->mat_ind();
+        const SolidMaterial& material = idata->get_material(mat_ind);
+
+        double capacity = material.heat_capacity(fe, p_data_, Tsr, Tpsr, Vsr);
+
+//        if (capacity != capacity) {
+//            material.heat_capacity(fe, p_data_, Tsr, Tpsr, Vsr);
+//            PrintError("SolidEquation::compute_capprox -> capacity != capacity");
+//        }
 
 		for(int i = 0; i < elem->n_nodes(); i++) {
 			SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));
-			double v = pData->get_velocity();
-			double T = pData->get_prev_temp();
-			double Tprev = pData->get_prev_minus_1_temp();
-			double capacity = material.heat_capacity(fe, p_data_, T, Tprev, v);
+//			double v = pData->get_velocity();
+//			double T = pData->get_prev_temp();
+//			double Tprev = pData->get_prev_minus_1_temp();
+//			double capacity = material.heat_capacity(fe, p_data_, T, Tprev, v);
 
 			pData->set_capprox(capacity);
 		}

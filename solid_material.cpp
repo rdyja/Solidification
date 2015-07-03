@@ -275,13 +275,13 @@ double SolidMaterial::heat_capacity(const TALYFEMLIB::FEMElm& fe,
 	  if (diff) {
 		double sum_n_2 = 0.0, sum_d_2 = 0.0;
 		for (int dir = 0; dir < nsd; dir++) {
-			double sum_n = 0.0, sum_d = 0.0;
+			double sum_h = 0.0, sum_t = 0.0;
 			for (ElemNodeID a = 0; a < nnd; a++) {
-				sum_n += fe.dN(a, dir) * Hprev[a] * fe.dN(a, dir) * Tprev[a];
-				sum_d += fe.dN(a, dir) * Tprev[a] * fe.dN(a, dir) * Tprev[a];
+				sum_h += fe.dN(a, dir) * Hprev[a];// * fe.dN(a, dir) * Tprev[a];
+				sum_t += fe.dN(a, dir) * Tprev[a];// * fe.dN(a, dir) * Tprev[a];
 			}
-			sum_n_2 += sum_n;
-			sum_d_2 += sum_d;
+			sum_n_2 += sum_h*sum_t;
+			sum_d_2 += pow(sum_t, 2.0);
 		}
 		return sum_n_2/sum_d_2;
 
