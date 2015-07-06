@@ -8,24 +8,49 @@ using namespace TALYFEMLIB;
 
 SolidEquation::SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb)
  :idata(id), contact_bounds_(NULL) {
+    timers_[kTimerSolve].set_label("Solve");
+    timers_[kTimerAssemble].set_label("Assemble");
+    timers_[kTimerKSPSolve].set_label("KSPSolve");
+    timers_[kTimerUpdate].set_label("Update");
 }
 
+SolidEquation::~SolidEquation() {
+  timers_[kTimerSolve].PrintGlobalAverageSeconds();
+  timers_[kTimerSolve].PrintGlobalTotalSeconds();
+  timers_[kTimerAssemble].PrintGlobalAverageSeconds();
+  timers_[kTimerAssemble].PrintGlobalTotalSeconds();
+  timers_[kTimerKSPSolve].PrintGlobalAverageSeconds();
+  timers_[kTimerKSPSolve].PrintGlobalTotalSeconds();
+  timers_[kTimerUpdate].PrintGlobalAverageSeconds();
+  timers_[kTimerUpdate].PrintGlobalTotalSeconds();
+}
+
+
 void SolidEquation::Solve(double t, double dt) {
+	timers_[kTimerSolve].Start();  // we want to time the entire solve process
     this->t_ = t;
     this->dt_ = dt;
 
     fillEssBC();
     ApplyEssBCToSolution();
+    timers_[kTimerAssemble].Start();  // we're timing just the assembly
     Assemble();
+    timers_[kTimerAssemble].Stop();
     ApplyEssBC();
 
+    timers_[kTimerKSPSolve].Start();  // time the KSPSolve step
     SolveKSP(solution_, 1, 0);
+    timers_[kTimerKSPSolve].Stop();
 
+    timers_[kTimerUpdate].Start();  // time the process of saving the solution
     for(int A=0; A < p_grid_->n_nodes(); A++){
         double newval=solution_(A);
         //pData->Node(A).UpdateDataStructures();
         p_data_->Node(A).set_curr_temp(newval);
     }
+    timers_[kTimerUpdate].Stop();
+    timers_[kTimerSolve].Stop();
+
 }
 
 double SolidEquation::compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf2) {

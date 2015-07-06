@@ -2,6 +2,7 @@
 #define SOLID_EQUATION_H
 
 #include <FEM/cequation.h>
+#include <Utils/timers.h>
 #include "solid_node_data.hpp"
 #include "solid_input_data.hpp"
 #include "contact_bounds.hpp"
@@ -10,6 +11,7 @@ class SolidEquation
 : public TALYFEMLIB::CEquation<SolidNodeData> {
     public:
         SolidEquation(SolidInputData* id, TALYFEMLIB::ContactBounds* cb);
+        ~SolidEquation();
         void Solve(double t, double dt) override;
         void Integrands(const TALYFEMLIB::FEMElm& fe,
                 TALYFEMLIB::ZeroMatrix<double>& Ae, TALYFEMLIB::ZEROARRAY<double>& be) override;
@@ -53,6 +55,15 @@ class SolidEquation
         double compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf);
         double compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, int nbf);
         double compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int nbf);
+
+    	// indices to timing arrays. These are locations in the timers_ array that
+    	// correspond to specific stages of the code that we wish to time.
+    	static const int kTimerSolve = 0;  ///< index to timer for solve process
+    	static const int kTimerAssemble = 1;  ///< index to timer for assemble
+    	static const int kTimerKSPSolve = 2;  ///< index to timer for KSPsolve
+    	static const int kTimerUpdate = 3;  ///< index to timer for update process
+    	MPITimer timers_[4];  ///< for timing several parts of the code
+
 };
 
 #endif
