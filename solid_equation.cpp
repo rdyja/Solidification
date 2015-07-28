@@ -277,20 +277,20 @@ void SolidEquation::AssembleAebeWithContact(FEMElm& fe, int elmID,
 	CalcAebeIndicesWithContact(fe, vertex_arr1, vertex_col_arr1,
 									vertex_arr2, vertex_col_arr2);
 
-	AssembleAebeWithIndex(Ae1, be, vertex_arr1.size(), vertex_arr1.data(),
+	AssembleAebeWithIndex(Ae1.data(), be.data(), vertex_arr1.size(), vertex_arr1.data(),
 								vertex_col_arr1.size(), vertex_col_arr1.data());
 
 	be.fill(0.0); //we should not assemble the same 'be' multiple times
-	AssembleAebeWithIndex(Ae2, be, vertex_arr1.size(), vertex_arr1.data(),
+	AssembleAebeWithIndex(Ae2.data(), be.data(), vertex_arr1.size(), vertex_arr1.data(),
 								vertex_col_arr2.size(), vertex_col_arr2.data()); //this requires special handling in preallocate
 
 
 	Ae1.ratio(-1.0); // values on the second side have opposite sign
 	Ae2.ratio(-1.0); // values on the second side have opposite sign
 
-	AssembleAebeWithIndex(Ae1, be, vertex_arr2.size(), vertex_arr2.data(),
+	AssembleAebeWithIndex(Ae1.data(), be.data(), vertex_arr2.size(), vertex_arr2.data(),
 								vertex_col_arr1.size(), vertex_col_arr1.data()); //this requires special handling in preallocate
-	AssembleAebeWithIndex(Ae2, be, vertex_arr2.size(), vertex_arr2.data(),
+	AssembleAebeWithIndex(Ae2.data(), be.data(), vertex_arr2.size(), vertex_arr2.data(),
 								vertex_col_arr2.size(), vertex_col_arr2.data());
 
 }
