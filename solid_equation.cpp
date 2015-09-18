@@ -247,7 +247,7 @@ void SolidEquation::AssembleElementContact(int elmID,
 	for (ELEM::SurfaceList_type::const_iterator it = fe.pElm->surface_indicator_.begin();
 			it != fe.pElm->surface_indicator_.end(); it++) {
 
-		fe.refill(p_grid_, elmID, it->surface_id());
+		fe.refill(p_grid_, elmID, &(*it));
 		fe.setRelativeOrder(order_);
 		fe.initNumItg();
 
