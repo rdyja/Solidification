@@ -45,8 +45,8 @@ void SolidEquation::Solve(double t, double dt) {
     timers_[kTimerUpdate].Start();  // time the process of saving the solution
     for(int A=0; A < p_grid_->n_nodes(); A++){
         double newval=solution_(A);
-        //pData->Node(A).UpdateDataStructures();
-        p_data_->Node(A).set_curr_temp(newval);
+        //pData->GetNodeData(A).UpdateDataStructures();
+        p_data_->GetNodeData(A).set_curr_temp(newval);
     }
     timers_[kTimerUpdate].Stop();
     timers_[kTimerSolve].Stop();
@@ -59,7 +59,7 @@ double SolidEquation::compute_average_velocity(const TALYFEMLIB::FEMElm& fe, int
     double Vsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
-        Vsr += p_data_->Node(J).get_velocity();
+        Vsr += p_data_->GetNodeData(J).get_velocity();
     }
     return Vsr /= nbf;
 }
@@ -70,7 +70,7 @@ double SolidEquation::compute_average_temp(const TALYFEMLIB::FEMElm& fe, int nbf
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
-        Tsr += p_data_->Node(J).get_prev_temp();
+        Tsr += p_data_->GetNodeData(J).get_prev_temp();
     }
     return Tsr /= nbf;
 }
@@ -81,7 +81,7 @@ double SolidEquation::compute_average_temp_prev(const TALYFEMLIB::FEMElm& fe, in
     double Tsr = 0.0;
     for(int i = 0; i < nbf; ++i) {
         int J = fe.pElm->ElemToLocalNodeID(i);
-        Tsr += p_data_->Node(J).get_prev_minus_1_temp();
+        Tsr += p_data_->GetNodeData(J).get_prev_minus_1_temp();
     }
     return Tsr /= nbf;
 }
@@ -141,9 +141,9 @@ void SolidEquation::Integrands(const TALYFEMLIB::FEMElm& fe, TALYFEMLIB::ZeroMat
             Ae(a,a) += M/dt_;
             Ae(a,b) += N;
             int J = fe.pElm->ElemToLocalNodeID(b);
-            be(a) += M/dt_*p_data_->Node(J).get_prev_temp();
+            be(a) += M/dt_*p_data_->GetNodeData(J).get_prev_temp();
         }
-	    p_data_->Node(fe.pElm->ElemToLocalNodeID(a)).set_capprox(capacity);
+	    p_data_->GetNodeData(fe.pElm->ElemToLocalNodeID(a)).set_capprox(capacity);
     }
 }
 
@@ -370,7 +370,7 @@ void SolidEquation::compute_solid_fraction() {
 
 		for(int i = 0; i < elem->n_nodes(); i++) {
 			SolidMaterial& solid_material = idata->get_material(mat_ind);
-			SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
+			SolidNodeData* pData = &p_data_->GetNodeData(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
 			double v = pData->get_velocity();
 			double Twe = pData->get_prev_temp();
 			double fs = solid_material.get_solidification_model().solid_phase_fraction(Twe, v);
@@ -386,7 +386,7 @@ void SolidEquation::compute_real_solidus_temperature() {
 
 	for(int i = 0; i < elem->n_nodes(); i++) {
             SolidMaterial& solid_material = idata->get_material(mat_ind);
-            SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
+            SolidNodeData* pData = &p_data_->GetNodeData(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
             double v = pData->get_velocity();
             double ts = solid_material.get_solidification_model().real_solidus_temperature(v);
             pData->set_real_solidus_temperature(ts);
@@ -401,7 +401,7 @@ void SolidEquation::compute_grain_size() {
 
 	for(int i = 0; i < elem->n_nodes(); i++) {
             SolidMaterial& solid_material = idata->get_material(mat_ind);
-            SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
+            SolidNodeData* pData = &p_data_->GetNodeData(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
             double v = pData->get_velocity();
             double rz = solid_material.grain_size(v);
             pData->set_grain_size(rz);
@@ -435,7 +435,7 @@ void SolidEquation::compute_capprox() {
 //        }
 
 		for(int i = 0; i < elem->n_nodes(); i++) {
-			SolidNodeData* pData = &p_data_->Node(elem->ElemToLocalNodeID(i));
+			SolidNodeData* pData = &p_data_->GetNodeData(elem->ElemToLocalNodeID(i));
 //			double v = pData->get_velocity();
 //			double T = pData->get_prev_temp();
 //			double Tprev = pData->get_prev_minus_1_temp();

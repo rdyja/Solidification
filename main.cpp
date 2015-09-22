@@ -30,15 +30,15 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         if (mat.is_casting())
             for (int j = 0; j < fe.pElm->n_nodes(); ++j) {
                 int globalNumNode = fe.pElm->ElemToLocalNodeID(j);
-                if (data.Node(globalNumNode).get_prev_temp() > mat.liquidus_temperature()) {
-                    double vel = fabs(mat.initial_temperature() - data.Node(globalNumNode).get_prev_temp())/dTime;
-                    data.Node(globalNumNode).set_velocity(vel);
+                if (data.GetNodeData(globalNumNode).get_prev_temp() > mat.liquidus_temperature()) {
+                    double vel = fabs(mat.initial_temperature() - data.GetNodeData(globalNumNode).get_prev_temp())/dTime;
+                    data.GetNodeData(globalNumNode).set_velocity(vel);
                 }
             }
         else
             for (int j = 0; j < fe.pElm->n_nodes(); ++j) {
                 int globalNumNode = fe.pElm->ElemToLocalNodeID(j);
-                data.Node(globalNumNode).set_velocity(0.0);
+                data.GetNodeData(globalNumNode).set_velocity(0.0);
             }
 
     }
@@ -53,7 +53,7 @@ void detect_eutectic_solidification(SolidInputData& inputData, SolidGridField& d
 
 	for(int i = 0; i < elem->n_nodes(); i++) {
             SolidMaterial& solid_material = inputData.get_material(mat_ind);
-            SolidNodeData* pData = &data.Node(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
+            SolidNodeData* pData = &data.GetNodeData(elem->ElemToLocalNodeID(i));//&(Node(elem->node_id_array(i)));
             double Twe = solid_material.get_solidification_model().real_solidus_temperature(pData->get_velocity());
             pData->set_t_with_eutectic(Twe);
         }

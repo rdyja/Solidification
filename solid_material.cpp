@@ -174,8 +174,8 @@ double SolidMaterial::heat_capacity(const TALYFEMLIB::FEMElm& fe,
 	  vector<double> Tprev(nnd), Vprev(nnd), Hprev(nnd);
 	  for (ElemNodeID a = 0; a < nnd; a++) {
 		  const int J = fe.pElm->ElemToLocalNodeID(a);
-		  Tprev[a] = p_data->Node(J).get_prev_temp();
-		  Vprev[a] = p_data->Node(J).get_velocity();
+		  Tprev[a] = p_data->GetNodeData(J).get_prev_temp();
+		  Vprev[a] = p_data->GetNodeData(J).get_velocity();
 		  Hprev[a] = enthalpy_model_->enthalpy_in_mushy_zone(Tprev[a], Vprev[a]);
 	  }
 
@@ -218,8 +218,8 @@ double SolidMaterial::heat_capacity(const TALYFEMLIB::FEMElm& fe,
 	  vector<double> Tprev(nnd), Vprev(nnd), Hprev(nnd);
 	  for (ElemNodeID a = 0; a < nnd; a++) {
 		  const int J = fe.pElm->ElemToLocalNodeID(a);
-		  Tprev[a] = p_data->Node(J).get_prev_temp();
-		  Vprev[a] = p_data->Node(J).get_velocity();
+		  Tprev[a] = p_data->GetNodeData(J).get_prev_temp();
+		  Vprev[a] = p_data->GetNodeData(J).get_velocity();
 		  Hprev[a] = enthalpy_model_->enthalpy_in_mushy_zone(Tprev[a], Vprev[a]);
 	  }
 
@@ -259,8 +259,8 @@ double SolidMaterial::heat_capacity(const TALYFEMLIB::FEMElm& fe,
 	  vector<double> Tprev(nnd), Vprev(nnd), Hprev(nnd);
 	  for (ElemNodeID a = 0; a < nnd; a++) {
 		  const int J = fe.pElm->ElemToLocalNodeID(a);
-		  Tprev[a] = p_data->Node(J).get_prev_temp();
-		  Vprev[a] = p_data->Node(J).get_velocity();
+		  Tprev[a] = p_data->GetNodeData(J).get_prev_temp();
+		  Vprev[a] = p_data->GetNodeData(J).get_velocity();
 		  Hprev[a] = enthalpy_model_->enthalpy_in_mushy_zone(Tprev[a], Vprev[a]);
 	  }
 
