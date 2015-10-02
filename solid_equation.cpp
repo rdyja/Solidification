@@ -221,7 +221,7 @@ void SolidEquation::AssembleVolume(bool assemble_surface) {
     be.fill(0);
     AssembleElement(elmID, Ae, be, fe, assemble_surface);
 
-    if (contact_bounds_ != NULL) {
+    if (contact_bounds_->has_periodic()) {
         ZeroMatrix<double> Ae1, Ae2;
         if (recalc_matrix_) {
           Ae1.redim(n, n); Ae2.redim(n, n);

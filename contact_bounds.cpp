@@ -14,7 +14,7 @@ void ContactBounds::LoadContactBounds(GRID *pg,
 		  const std::vector<PetscInt>& oldID, const std::vector<PetscInt>& newID) {
 
 	  p_grid_ = pg;
-	  is_periodic_ = true;
+	  has_periodic_ = true;
 
 	  // set the partners for the boundaries
 	  is_node_periodic_.redim(this->p_grid_->n_nodes());
@@ -38,9 +38,9 @@ void ContactBounds::LoadContactBounds(GRID *pg,
 void ContactBounds::ImportContactBounds(GRID *pg) {
 
 	  p_grid_ = pg;
-	  is_periodic_ = true;
 
 //	  PrintInfo("TransferContactBounds");
+
 
 	  const map<int,int>& grid_periodics = pg->get_node_periodics();
 
@@ -51,14 +51,20 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 	  for (map<int,int>::const_iterator it = grid_periodics.begin();
 			  it != grid_periodics.end(); ++it) {
 
-	    if (p_grid_->parallel_type_ == kWithDomainDecomp) {
-	    	throw TALYException() << "Domain Decomposition unsupported in LoadPeriodicBounds";
-	    } else {
+		if (p_grid_->parallel_type_ == kWithDomainDecomp) {
+			throw TALYException() << "Domain Decomposition unsupported in LoadPeriodicBounds";
+		} else {
 			is_node_periodic_.set(it->first, true);
 			pbc_partners_[it->first] = it->second;
 			pbc_sol_partners_[it->first] = it->second;
-	    }
+		}
 
+	  }
+
+	  if (pg->get_node_periodics().size() > 0) {
+		  has_periodic_ = true;
+	  } else {
+		  has_periodic_ = false;
 	  }
 
 }

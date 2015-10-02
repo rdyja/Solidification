@@ -29,10 +29,10 @@ namespace TALYFEMLIB {
 class ContactBounds {
 public:
 	// Default constructor
-	ContactBounds(): p_grid_(nullptr),  is_periodic_(false) { }
+	ContactBounds(): p_grid_(nullptr),  has_periodic_(false) { }
 	virtual ~ContactBounds() { }
 
-	inline bool is_periodic() { return is_periodic_; }
+	inline bool has_periodic() { return has_periodic_; }
 	inline bool IsNodePeriodic(int index) {
 		return is_node_periodic_.get(index);
 	}
@@ -60,7 +60,7 @@ public:
 
 private:
 	GRID* p_grid_;
-	bool is_periodic_;
+	bool has_periodic_;
 	ZEROARRAY<bool> is_node_periodic_;
 	PeriodicPhysicalMap pbc_partners_;
 	PeriodicSolutionMap pbc_sol_partners_;
