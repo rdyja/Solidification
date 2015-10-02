@@ -166,7 +166,7 @@ void SolidEquation::Assemble(bool assemble_surface) {
 	try {
 		PetscErrorCode ierr;
 		ierr = UpdateMatPreallocation(); CHKERRV(ierr);
-
+		MatSetOption(Ag_, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);  //Fixme: This has to be removed (when custom preallocator will be finished)
 		// zero the stiffness matrix and load
 		if (recalc_matrix_) { MatZeroEntries(Ag_); }
 		// trying to do VecZeroEntries (bg_);
