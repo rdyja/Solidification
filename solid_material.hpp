@@ -38,8 +38,8 @@ class SolidNodeData;
 class SolidMaterial
 {
 public:
-  explicit SolidMaterial(int index = 0);
-
+  explicit SolidMaterial(int index = 0);  
+  
   double conductivity(double T = 0.0, double vT = -1.0) const;
   double specific_heat(double T = 0.0, double vT = -1.0) const;
   double density(double T = 0.0, double vT = -1.0) const;
@@ -75,11 +75,11 @@ public:
   MaterialProperty get_property(int num) const;
   void set_property(const std::string&, double);
   void initialize_property_map();
-
+  
 private:
   std::unique_ptr<SolidificationModel> solidification_model_;
   std::unique_ptr<EnthalpyModel> enthalpy_model_;
-  std::map<std::string, double*> properties;
+  std::map<std::string, double> properties;
   double rhoL_, rhoS_, cL_, cS_, lambdaL_, lambdaS_, Tl_, Ts_, L_, T0_, k_;
   //Tp_ - pure melting temperature
   //Te_ - euthectic temperature
