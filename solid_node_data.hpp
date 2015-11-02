@@ -9,27 +9,27 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
                 switch(index) {
                     case 0:
                         return t0;
-                    case 1:
+                    /*case 1:
                         return t1;
                     case 2:
-                        return t2;
-                    case 3:
+                        return t2;*/
+                    case 1:
                         return v;
-                    case 4:
+                    case 2:
                         return fs;
-                    case 5:
+                    case 3:
                         return ts;
-                    case 6:
+                    case 4:
                         return rz;
-                    case 7:
+                    /*case 7:
                         return flux_x;
                     case 8:
                         return flux_y;
                     case 9:
-                        return flux_z;
-                    case 10:
+                        return flux_z;*/
+                    case 5:
                         return twe;
-                    case 11:
+                    case 6:
                         return capprox;
                 }
                 throw std::string("Wrong node value");
@@ -38,27 +38,27 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
                 switch(index) {
                     case 0:
                         return t0;
-                    case 1:
+                    /*case 1:
                         return t1;
                     case 2:
-                        return t2;
-                    case 3:
+                        return t2;*/
+                    case 1:
                         return v;
-                    case 4:
+                    case 2:
                         return fs;
-                    case 5:
+                    case 3:
                         return ts;
-                    case 6:
+                    case 4:
                         return rz;
-                    case 7:
+                    /*case 7:
                         return flux_x;
                     case 8:
                         return flux_y;
                     case 9:
-                        return flux_z;
-                    case 10:
+                        return flux_z;*/
+                    case 5:
                         return twe;
-                    case 11:
+                    case 6:
                         return capprox;
                 }
                 throw std::string("Wrong node value");
@@ -66,28 +66,28 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
             static const char* name(int index) {
                 switch(index) {
                     case 0:
-                        return "t0";
-                    case 1:
+                        return "T";
+                    /*case 1:
                         return "t1";
                     case 2:
-                        return "t-1";
-                    case 3:
+                        return "t-1";*/
+                    case 1:
                         return "v";
-                    case 4:
+                    case 2:
                         return "fs";
-                    case 5:
+                    case 3:
                         return "ts";
-                    case 6:
+                    case 4:
                         return "rz";
-                    case 7:
+                    /*case 7:
                         return "fluxX";
                     case 8:
                         return "fluxY";
                     case 9:
-                        return "fluxZ";
-                    case 10:
+                        return "fluxZ";*/
+                    case 5:
                         return "T_with_eutectic";
-                    case 11:
+                    case 6:
                         return "c_approx";
                 }
                 throw std::string("Wrong node value");
@@ -156,7 +156,7 @@ class SolidNodeData:public TALYFEMLIB::NODEData {
            }
 
            static int valueno() {
-               return 12;
+               return 7;
            }
            void UpdateDataStructures() {
                t2 = t1;
