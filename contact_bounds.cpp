@@ -50,9 +50,24 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 
 	  for (map<int,int>::const_iterator it = grid_periodics.begin();
 			  it != grid_periodics.end(); ++it) {
+		  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
+				  "grid_periodics: first=%d  second=%d\n", it->first, it->second);
+		  if (p_grid_->parallel_type_ == kWithDomainDecomp) {
+			  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
+					  "grid_periodics: solution_map(first)=%d solution_map(second)%d\n",
+					  p_grid_->solution_map(it->first), p_grid_->solution_map(it->second));
+		  }
+		  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
+	  }
+
+	  for (map<int,int>::const_iterator it = grid_periodics.begin();
+			  it != grid_periodics.end(); ++it) {
 
 		if (p_grid_->parallel_type_ == kWithDomainDecomp) {
-			throw TALYException() << "Domain Decomposition unsupported in LoadPeriodicBounds";
+//			throw TALYException() << "Domain Decomposition unsupported in LoadPeriodicBounds";
+			is_node_periodic_.set(it->first, true);
+			pbc_partners_[it->first] = it->second;
+			pbc_sol_partners_[it->first] = p_grid_->solution_map(it->second);
 		} else {
 			is_node_periodic_.set(it->first, true);
 			pbc_partners_[it->first] = it->second;
