@@ -244,6 +244,8 @@ void SolidEquation::AssembleElementContact(int elmID,
 
 	bool flag = false; // flag to check if really there is a need to add contact BC to global matrix
 
+//	PrintInfo("AssembleElementContact::fe.pElm->surface_indicator_.size() = ", fe.pElm->surface_indicator_.size());
+
 	for (ELEM::SurfaceList_type::const_iterator it = fe.pElm->surface_indicator_.begin();
 			it != fe.pElm->surface_indicator_.end(); it++) {
 
@@ -254,6 +256,7 @@ void SolidEquation::AssembleElementContact(int elmID,
 		while (fe.moreItgPoints()) {
 			fe.update4nextItgPt();
 			for (unsigned int i = 0; i < SurfaceIndicator::MAX_SURFACE_INDICATORS; i++) {
+//				PrintInfo("AssembleElementContact::it->has_indicator(", i, ")", it->has_indicator(i));
 				if (it->has_indicator(i)) {
 					flag = Integrands4contact(fe, i, Ae1, Ae2, be1) or flag;
 				}
@@ -315,23 +318,23 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 	if (p_grid_->parallel_type_ == kNoDomainDecomp) {
 		for (int i = 0; i < fe.pElm->n_nodes(); i++) {
 			for (int k = 0; k < n_dof_; k++) {
-				int gid = fe.pElm->node_id_array(i) * n_dof_ + k;
+				LocalVarIdx lid = fe.pElm->node_id_array(i) * n_dof_ + k;
 				int idx = i * n_dof_ + k;
 
-				if (has_ess_bc_.get(gid)) {
+				if (has_ess_bc_.get(lid)) {
 					rows_ptr1[idx] = -1;
 				} else {
-					rows_ptr1[idx] = gid;
+					rows_ptr1[idx] = lid;
 				}
-				cols_ptr1[idx] = gid;
+				cols_ptr1[idx] = lid;
 
 //				PrintInfo("gid = ", gid, "\thas_contact_bc_.get(gid) = ", has_contact_bc_.get(gid));
-				if (has_contact_bc_.get(gid)) {
+				if (has_contact_bc_.get(lid)) {
 					int lclnodeID = fe.pElm->node_id_array(i);
 
 					int newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
 					// we don't want this to override an essential condition
-					if (!has_ess_bc_.get(gid)) {
+					if (!has_ess_bc_.get(lid)) {
 						rows_ptr2[idx] = newNode * n_dof_ + k;
 					} else {
 						rows_ptr2[idx] = -1;
@@ -348,9 +351,46 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 		}
 	} else {
 
-		PrintError("Contact boudary condition not implemented for ",
-														"Domain Decomposition");
-		exit(1);
+//		PrintError("Contact boudary condition not implemented for ",
+//														"Domain Decomposition");
+//		exit(1);
+		for (int i = 0; i < fe.pElm->n_nodes(); i++) {
+			for (int k = 0; k < n_dof_; k++) {
+				LocalVarIdx lid = fe.pElm->node_id_array(i) * n_dof_ + k;
+		        GlobalVarIdx gid = (p_grid_->solution_map(fe.pElm->node_id_array(i)))
+		                           * n_dof_ + k;
+				int idx = i * n_dof_ + k;
+
+				if (has_ess_bc_.get(lid)) {
+					rows_ptr1[idx] = -1;
+				} else {
+					rows_ptr1[idx] = gid;
+				}
+				cols_ptr1[idx] = gid;
+
+//				PrintInfo("gid = ", gid, "\thas_contact_bc_.get(gid) = ", has_contact_bc_.get(gid));
+				if (has_contact_bc_.get(lid)) {
+					LocalNodeID lclnodeID = fe.pElm->node_id_array(i);
+
+					SolutionNodeID newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
+					// we don't want this to override an essential condition
+					if (!has_ess_bc_.get(lid)) {
+						rows_ptr2[idx] = newNode * n_dof_ + k;
+					} else {
+						rows_ptr2[idx] = -1;
+					}
+					cols_ptr2[idx] = newNode * n_dof_ + k;
+//					PrintInfo("gid = ", gid, "\topposite gid = ", newNode);
+				} else {
+					rows_ptr2[idx] = -1;
+					cols_ptr2[idx] = -1;
+//					PrintInfo("gid = ", gid);
+//					PrintError("CalcAebeIndicesWithContact called for surface without contact data");
+				}
+			}
+		}
+
+
 	}
 }
 

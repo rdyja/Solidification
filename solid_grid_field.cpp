@@ -27,7 +27,7 @@ void SolidGridField::SetIC(int nsd) {
 		for(int i = 0; i < elem->n_nodes(); i++) {
 			SolidNodeData* pData = &(GetNodeData(elem->node_id_array(i)));
 			pData->set_curr_temp(inputData_.initial_temperature(mat_ind));
-			PrintInfo("SolidGridField::elem_id: ", elemID, " mat_ind: ", mat_ind);
+//			PrintInfo("SolidGridField::elem_id: ", elemID, " mat_ind: ", mat_ind);
 		}
 	}
 

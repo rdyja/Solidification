@@ -54,7 +54,7 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 				  "grid_periodics: first=%d  second=%d\n", it->first, it->second);
 		  if (p_grid_->parallel_type_ == kWithDomainDecomp) {
 			  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
-					  "grid_periodics: solution_map(first)=%d solution_map(second)%d\n",
+					  "grid_periodics: solution_map(first)=%d solution_map(second)=%d\n",
 					  p_grid_->solution_map(it->first), p_grid_->solution_map(it->second));
 		  }
 		  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
