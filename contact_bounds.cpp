@@ -37,13 +37,7 @@ void ContactBounds::LoadContactBounds(GRID *pg,
 
 void ContactBounds::ImportContactBounds(GRID *pg) {
 
-	  if (pg->get_node_periodics().size() > 0) {
-		  has_periodic_ = true;
-//		  PrintInfo("TransferContactBounds");
-	  } else {
-		  has_periodic_ = false;
-		  return;
-	  }
+	//		  PrintInfo("TransferContactBounds");
 
 	  p_grid_ = pg;
 
@@ -52,6 +46,15 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 	  // set the partners for the boundaries
 	  is_node_periodic_.redim(p_grid_->n_nodes());
 	  is_node_periodic_.fill(false);
+
+
+	  if (pg->get_node_periodics().size() > 0) {
+		  has_periodic_ = true;
+	  } else {
+		  has_periodic_ = false;
+		  return;
+	  }
+
 
 //	  for (int i = 0; i < pg->n_nodes(); i++) {
 //		  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
