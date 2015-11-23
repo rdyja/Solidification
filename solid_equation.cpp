@@ -372,7 +372,7 @@ void SolidEquation::CalcAebeIndicesWithContact(FEMElm& fe,
 				if (has_contact_bc_.get(lid)) {
 					LocalNodeID lclnodeID = fe.pElm->node_id_array(i);
 
-					SolutionNodeID newNode = contact_bounds_->GetPeriodicSolPartner(lclnodeID);
+					SolutionNodeID newNode = contact_bounds_->GetPeriodicSolPartner(p_grid_->solution_map(lclnodeID));
 					// we don't want this to override an essential condition
 					if (!has_ess_bc_.get(lid)) {
 						rows_ptr2[idx] = newNode * n_dof_ + k;

@@ -93,7 +93,7 @@ void performCalculation(SolidInputData& inputData, SolidGridField& data,
 
 			detect_eutectic_solidification(inputData, data);
 			solidEq.compute_additional_values();
-			sfln << resultFileNamePrefix << rank << "_" << i << extension;
+			sfln << resultFileNamePrefix << "_" << i << extension;
 			//data.printNodeData(sfln.str().c_str());
 			TALYFEMLIB::save_gf(&data, &inputData, sfln.str().c_str(), t);
 
