@@ -27,12 +27,11 @@ void SolidGridField::SetIC(int nsd) {
 		for(int i = 0; i < elem->n_nodes(); i++) {
 			SolidNodeData* pData = &(GetNodeData(elem->node_id_array(i)));
 			pData->set_curr_temp(inputData_.initial_temperature(mat_ind));
-//			PrintInfo("SolidGridField::elem_id: ", elemID, " mat_ind: ", mat_ind);
-			PetscSynchronizedPrintf(PETSC_COMM_WORLD, "[%d] SolidGridField::elem_id: %d mat_ind: %d\n",
-					p_grid_->grid_id(), elemID, mat_ind);
+//			PetscSynchronizedPrintf(PETSC_COMM_WORLD, "[%d] SolidGridField::elem_id: %d mat_ind: %d\n",
+//					p_grid_->grid_id(), elemID, mat_ind);
 		}
 	}
-    PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
+//    PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
 
 
 }

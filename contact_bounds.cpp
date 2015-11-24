@@ -56,12 +56,14 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 	  }
 
 
-	  for (int i = 0; i < pg->n_nodes(); i++) {
-		  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
-		  				  "[%d] %d) physical_map=%d  solution_map=%d\n",
-						  pg->grid_id(), i, pg->physical_map(i), pg->solution_map(i));
+	  if (p_grid_->parallel_type_ == kWithDomainDecomp) {
+		  for (int i = 0; i < pg->n_nodes(); i++) {
+			  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
+							  "[%d] %d) physical_map=%d  solution_map=%d\n",
+							  pg->grid_id(), i, pg->physical_map(i), pg->solution_map(i));
+		  }
+		  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
 	  }
-	  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
 
 	  for (map<int,int>::const_iterator it = grid_periodics.begin();
 			  it != grid_periodics.end(); ++it) {
@@ -77,7 +79,7 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 		if (p_grid_->parallel_type_ == kWithDomainDecomp) {
 			pbc_partners_[it->first] = it->second;
 			pbc_sol_partners_[it->first] = it->second;
-			// is_node_periodic must be handled in special way
+			// is_node_periodic must be handled in a special way
 		} else {
 			pbc_partners_[it->first] = it->second;
 			pbc_sol_partners_[it->first] = it->second;
