@@ -34,7 +34,7 @@ class MaterialProperty {
 	   }
 };
 
-class EnthalpyModel;
+//~ class EnthalpyModel;
 class SolidificationModel;
 class SolidNodeData;
 
@@ -43,11 +43,26 @@ class SolidMaterial
 public:
   explicit SolidMaterial(int index = 0);
 
-  SolidMaterial(SolidMaterial&& sm): solidification_model_(std::move(sm.solidification_model_)),
-		  enthalpy_model_(std::move(sm.enthalpy_model_)), properties(std::move(sm.properties))
-  { }
+  SolidMaterial(SolidMaterial&& sm):
+		solidification_model_(std::move(sm.solidification_model_)),
+		enthalpy_model_(std::move(sm.enthalpy_model_)), 
+		properties(std::move(sm.properties)),
+		rhoL_(sm.rhoL_), rhoS_(sm.rhoS_), 
+		cL_(sm.cL_), cS_(sm.cS_), 
+		lambdaL_(sm.lambdaL_), lambdaS_(sm.lambdaS_), 
+		Tl_(sm.Tl_), Ts_(sm.Ts_), L_(sm.L_), T0_(sm.T0_), k_(sm.k_),
+		Tp_(sm.Tp_), Te_(sm.Te_), 
+		maxGrainSize_(sm.maxGrainSize_), 
+		coeffBF_(sm.coeffBF_), sourceTerm_(sm.sourceTerm_),
+		isCasting_(sm.isCasting_),
+		name_(sm.name_),
+		heatcapacity_model_id_(sm.heatcapacity_model_id_)
+		{ 
+			//~ std::cout << "SolidMaterial(SolidMaterial&& sm)" << std::endl;
+		}
   SolidMaterial& operator=(SolidMaterial&& sm) {
-	  return *this;
+		//~ std::cout << "SolidMaterial(SolidMaterial&& sm)" << std::endl;
+		return *this;
   }
 
   double conductivity(double T = 0.0, double vT = -1.0) const;
