@@ -208,7 +208,7 @@ bool SolidInputData::set_conductivity_properties(const MapConf& conf, SolidMater
 }
 
 bool SolidInputData::recognize_material(const MapConf& conf) {
-    solid_materials_.push_back(SolidMaterial());
+    solid_materials_.push_back(std::move(SolidMaterial()));
     SolidMaterial& solid_material = solid_materials_[solid_materials_.size() - 1];
 
     solid_material.set_name(recognize_name(conf));

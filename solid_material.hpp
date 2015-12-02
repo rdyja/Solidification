@@ -12,9 +12,12 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <algorithm>
 
 #include <Grid/femelm.h>
 #include <Grid/gridfield.h>
+
+#include "enthalpy_model.hpp"
 
 const int MORGAN_HEAT_CAPACITY = 1;
 const int DELGUIDICE_HEAT_CAPACITY = 2;
@@ -38,8 +41,15 @@ class SolidNodeData;
 class SolidMaterial
 {
 public:
-  explicit SolidMaterial(int index = 0);  
-  
+  explicit SolidMaterial(int index = 0);
+
+  SolidMaterial(SolidMaterial&& sm): solidification_model_(std::move(sm.solidification_model_)),
+		  enthalpy_model_(std::move(sm.enthalpy_model_)), properties(std::move(sm.properties))
+  { }
+  SolidMaterial& operator=(SolidMaterial&& sm) {
+	  return *this;
+  }
+
   double conductivity(double T = 0.0, double vT = -1.0) const;
   double specific_heat(double T = 0.0, double vT = -1.0) const;
   double density(double T = 0.0, double vT = -1.0) const;
@@ -75,7 +85,7 @@ public:
   MaterialProperty get_property(int num) const;
   void set_property(const std::string&, double);
   void initialize_property_map();
-  
+
 private:
   std::unique_ptr<SolidificationModel> solidification_model_;
   std::unique_ptr<EnthalpyModel> enthalpy_model_;
