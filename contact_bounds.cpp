@@ -56,22 +56,22 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 	  }
 
 
-	  if (p_grid_->parallel_type_ == kWithDomainDecomp) {
-		  for (int i = 0; i < pg->n_nodes(); i++) {
-			  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
-							  "[%d] %d) physical_map=%d  solution_map=%d\n",
-							  pg->grid_id(), i, pg->physical_map(i), pg->solution_map(i));
-		  }
-		  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
-	  }
+//	  if (p_grid_->parallel_type_ == kWithDomainDecomp) {
+//		  for (int i = 0; i < pg->n_nodes(); i++) {
+//			  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
+//							  "[%d] %d) physical_map=%d  solution_map=%d\n",
+//							  pg->grid_id(), i, pg->physical_map(i), pg->solution_map(i));
+//		  }
+//		  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
+//	  }
 
-	  for (map<int,int>::const_iterator it = grid_periodics.begin();
-			  it != grid_periodics.end(); ++it) {
-		  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
-				  "[%d] grid_periodics: first=%d  second=%d\n",
-				  pg->grid_id(), it->first, it->second);
-	  }
-	  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
+//	  for (map<int,int>::const_iterator it = grid_periodics.begin();
+//			  it != grid_periodics.end(); ++it) {
+//		  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
+//				  "[%d] grid_periodics: first=%d  second=%d\n",
+//				  pg->grid_id(), it->first, it->second);
+//	  }
+//	  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
 
 	  for (map<int,int>::const_iterator it = grid_periodics.begin();
 			  it != grid_periodics.end(); ++it) {
@@ -95,12 +95,12 @@ void ContactBounds::ImportContactBounds(GRID *pg) {
 		  }
 	  }
 
-	  for (int i = 0; i < pg->n_nodes(); i++) {
-		  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
-		  				  "[%d] %d) is_node_periodic=%d\n",
-						  pg->grid_id(), i, (int)is_node_periodic_.get(i));
-	  }
-	  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
+//	  for (int i = 0; i < pg->n_nodes(); i++) {
+//		  PetscSynchronizedPrintf(PETSC_COMM_WORLD,
+//		  				  "[%d] %d) is_node_periodic=%d\n",
+//						  pg->grid_id(), i, (int)is_node_periodic_.get(i));
+//	  }
+//	  PetscSynchronizedFlush(PETSC_COMM_WORLD, PETSC_STDOUT);
 
 
 }
