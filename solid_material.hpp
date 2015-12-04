@@ -45,25 +45,25 @@ public:
 
   SolidMaterial(SolidMaterial&& sm):
 		solidification_model_(std::move(sm.solidification_model_)),
-		enthalpy_model_(std::move(sm.enthalpy_model_)), 
+		enthalpy_model_(std::move(sm.enthalpy_model_)),
 		properties(std::move(sm.properties)),
-		rhoL_(sm.rhoL_), rhoS_(sm.rhoS_), 
-		cL_(sm.cL_), cS_(sm.cS_), 
-		lambdaL_(sm.lambdaL_), lambdaS_(sm.lambdaS_), 
-		Tl_(sm.Tl_), Ts_(sm.Ts_), L_(sm.L_), T0_(sm.T0_), k_(sm.k_),
-		Tp_(sm.Tp_), Te_(sm.Te_), 
-		maxGrainSize_(sm.maxGrainSize_), 
-		coeffBF_(sm.coeffBF_), sourceTerm_(sm.sourceTerm_),
 		isCasting_(sm.isCasting_),
 		name_(sm.name_),
 		heatcapacity_model_id_(sm.heatcapacity_model_id_)
-		{ 
-			//~ std::cout << "SolidMaterial(SolidMaterial&& sm)" << std::endl;
+		{
 		}
   SolidMaterial& operator=(SolidMaterial&& sm) {
-		//~ std::cout << "SolidMaterial(SolidMaterial&& sm)" << std::endl;
-		return *this;
+	  solidification_model_=std::move(sm.solidification_model_);
+	  enthalpy_model_ = std::move(sm.enthalpy_model_);
+	  properties =std::move(sm.properties);
+	  isCasting_ = sm.isCasting_;
+	  name_ = sm.name_;
+	  heatcapacity_model_id_ = sm.heatcapacity_model_id_;
+	  return *this;
   }
+
+  SolidMaterial(const SolidMaterial&) = delete;
+  SolidMaterial& operator=(const SolidMaterial&) = delete;
 
   double conductivity(double T = 0.0, double vT = -1.0) const;
   double specific_heat(double T = 0.0, double vT = -1.0) const;
@@ -105,10 +105,8 @@ private:
   std::unique_ptr<SolidificationModel> solidification_model_;
   std::unique_ptr<EnthalpyModel> enthalpy_model_;
   std::map<std::string, double> properties;
-  double rhoL_, rhoS_, cL_, cS_, lambdaL_, lambdaS_, Tl_, Ts_, L_, T0_, k_;
-  //Tp_ - pure melting temperature
-  //Te_ - euthectic temperature
-  double Tp_, Te_, maxGrainSize_, coeffBF_, sourceTerm_;
+  double k_;
+
   bool isCasting_;
   std::string name_;
   int heatcapacity_model_id_;

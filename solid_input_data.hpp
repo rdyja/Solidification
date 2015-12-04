@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <deque>
 #include <InputData/InputData.h>
 #include <Grid/grid_types/grid.h>
 #include "solid_model.hpp"
@@ -69,7 +70,7 @@ class SolidInputData : public TALYFEMLIB::InputData {
 		std::string recognize_name(const MapConf& map);
 		bool set_casting_properties(const MapConf& conf, SolidMaterial& solid_material);
 		bool set_conductivity_properties(const MapConf& conf, SolidMaterial& solid_material);
-	    std::vector<SolidMaterial> solid_materials_;
+	    std::deque<SolidMaterial> solid_materials_;
 		std::vector<NewtonBC> boundary_conditions_coeff_;
 		std::vector<ContactBC> contact_conditions_coeff_;
 		std::map<int, int> map_materials_;
