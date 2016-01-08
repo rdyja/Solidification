@@ -30,7 +30,8 @@ void compute_cooling_velocity_before_liquidus(SolidInputData& inputData,
         if (mat.is_casting())
             for (int j = 0; j < fe.pElm->n_nodes(); ++j) {
                 int globalNumNode = fe.pElm->ElemToLocalNodeID(j);
-                if (data.GetNodeData(globalNumNode).get_prev_temp() > mat.liquidus_temperature()) {
+                if ((data.GetNodeData(globalNumNode).get_prev_temp() > mat.liquidus_temperature())
+                		|| (dTime/inputData.time_step() == 2)) { // why dTime/inputData.time_step() == 2? because when ... == 1 we have still initial values and ... == 2 is frst step that actually uses calculated temperatures
                     double vel = fabs(mat.initial_temperature() - data.GetNodeData(globalNumNode).get_prev_temp())/dTime;
                     data.GetNodeData(globalNumNode).set_velocity(vel);
                 }
