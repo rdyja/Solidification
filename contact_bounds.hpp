@@ -13,10 +13,10 @@
 #include <map>  // for std::map
 #include <vector>  // for std::vector
 
-#include "Common/TALYException.h"  // for throwing exception
-#include "DataStructure/zeroarray.h" //for ZEROARRAY
-#include "Grid/grid_types/grid.h"  // for GRID class
-#include "FEM/periodic_bounds.h" // for PeriodicMap
+#include <Common/TALYException.h>  // for throwing exception
+#include <DataStructure/zeroarray.h> //for ZEROARRAY
+#include <Grid/grid_types/grid.h>  // for GRID class
+#include <FEM/periodic_bounds.h> // for PeriodicMap
 
 namespace TALYFEMLIB {
 
