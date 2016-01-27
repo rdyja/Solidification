@@ -23,31 +23,32 @@
 using namespace std;
 
 const double DOUBLE_VERY_SMALL = 1E-16;
+const int  NUM_PROPERTIES = 17;
 
-SolidMaterial::SolidMaterial(int index)
+SolidMaterial::SolidMaterial(int index) : properties(NUM_PROPERTIES)
 //: Material(MY_MATERIAL_TYPE, 16, m, 0)
 {
     initialize_property_map();
 }
 
 void SolidMaterial::initialize_property_map() {
-    properties["lambdaS"] = 0.0;
-    properties["cS"] = 0.0;
-    properties["rhoS"] = 0.0;
+	map_property_name_to_num["lambdaS"] = 0;
+    map_property_name_to_num["cS"] = 1;
+    map_property_name_to_num["rhoS"] = 2;
     //properites["isCasting",
-    properties["T0"] = 0.0;
-    properties["sourceTerm"] = 0.0;
-    properties["Ts"] = 0.0;
-    properties["Tl"] = 0.0;
-    properties["Te"] = 0.0;
-    properties["Tp"] = 0.0;
-    properties["lambdaL"] = 0.0;
-    properties["cL"] = 0.0;
-    properties["rhoL"] = 0.0;
-    properties["L"] = 0.0;
-    properties["maxGrainSize"] = 0.0;
-    properties["coeffBF"] = 0.0;
-    properties["n"] = 0.0;
+    map_property_name_to_num["T0"] = 4;
+    map_property_name_to_num["sourceTerm"] = 5;
+    map_property_name_to_num["Ts"] = 6;
+    map_property_name_to_num["Tl"] = 7;
+    map_property_name_to_num["Tp"] = 8;
+    map_property_name_to_num["Te"] = 9;
+    map_property_name_to_num["lambdaL"] = 10;
+    map_property_name_to_num["cL"] = 11;
+    map_property_name_to_num["rhoL"] = 12;
+    map_property_name_to_num["L"] = 13;
+    map_property_name_to_num["maxGrainSize"] = 14;
+    map_property_name_to_num["coeffBF"] = 15;
+    map_property_name_to_num["n"] = 16;
 }
 
 double SolidMaterial::grain_size(double vT) const
@@ -345,51 +346,19 @@ double SolidMaterial::enthalpy(double T, double vT) const
 }*/
 
 MaterialProperty SolidMaterial::get_property(int num) const{
-	switch(num) {
-		case 0:
-            return MaterialProperty(properties.at("lambdaS"));
-		case 1:
-			return MaterialProperty(properties.at("cS"));
-		case 2:
-			return MaterialProperty(properties.at("rhoS"));
-		case 3:
-			return MaterialProperty(0.0);
-		case 4:
-			return MaterialProperty(properties.at("T0"));
-		case 5:
-			return MaterialProperty(properties.at("sourceTerm"));
-		case 6:
-			return MaterialProperty(properties.at("Ts"));
-		case 7:
-			return MaterialProperty(properties.at("Tl"));
-		case 8:
-			return MaterialProperty(properties.at("Tp"));
-		case 9:
-			return MaterialProperty(properties.at("Te"));
-		case 10:
-			return MaterialProperty(properties.at("lambdaL"));
-		case 11:
-			return MaterialProperty(properties.at("cL"));
-		case 12:
-			return MaterialProperty(properties.at("rhoL"));
-		case 13:
-			return MaterialProperty(properties.at("L"));
-		case 14:
-			return MaterialProperty(properties.at("maxGrainSize"));
-		case 15:
-			return MaterialProperty(properties.at("coeffBF"));
-		case 16:
-			return MaterialProperty(properties.at("n"));
-	}
+	if(num >= 0 && num < NUM_PROPERTIES)
+		return properties[num];
+
 	throw std::string("Reading wrong material property");
 }
 
 void SolidMaterial::set_property(const string& propertyName, double value) {
+	auto property_position = map_property_name_to_num.find(propertyName);
 
-    if(properties.find(propertyName) == properties.end()) {
+    if(property_position == map_property_name_to_num.end()) {
         throw std::string("Setting wrong material property " + propertyName);
     }
-    properties[propertyName] = value;
+    properties[property_position->second] = MaterialProperty(value);
 }
 
 void SolidMaterial::update_k() {

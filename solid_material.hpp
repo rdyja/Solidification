@@ -27,7 +27,7 @@ const int COMMINI_HEAT_CAPACITY = 4;
 class MaterialProperty {
 		double param;
 	public:
-	   MaterialProperty(double p) : param(p)
+	   explicit MaterialProperty(double p = 0.0) : param(p)
 	   {}
 	   double evaluate(double T = 0.0) const {
 		   return param;
@@ -105,7 +105,9 @@ public:
 private:
   std::unique_ptr<SolidificationModel> solidification_model_;
   std::unique_ptr<EnthalpyModel> enthalpy_model_;
-  std::map<std::string, double> properties;
+  //std::map<std::string, MaterialProperty> properties;
+  std::vector<MaterialProperty> properties;
+  std::map<std::string, int> map_property_name_to_num;
   double k_;
 
   bool isCasting_;
