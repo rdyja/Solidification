@@ -166,6 +166,11 @@ bool SolidInputData::set_casting_properties(const MapConf& conf, SolidMaterial& 
     }
     solid_material.set_property("coeffBF", tmp);
 
+    if (!ReadValue(conf, "n", tmp)) {
+        return false;
+    }
+    solid_material.set_property("n", tmp);
+
     return true;
 }
 
@@ -203,6 +208,7 @@ bool SolidInputData::set_conductivity_properties(const MapConf& conf, SolidMater
     solid_material.set_property("L", 0.0);
     solid_material.set_property("maxGrainSize", 0.0);
     solid_material.set_property("coeffBF", 0.0);
+    solid_material.set_property("n", 0.0);
 
     return true;
 }

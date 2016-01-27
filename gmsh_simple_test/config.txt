@@ -3,8 +3,9 @@
 nsd = 3
 ifBoxGrid = 0
 orderOfBF = 1
-ifDD = 0
+ifDD = 1
 gridFile = simple2.msh
+ifLoadNodeIndicators = 1
 
 Lx = 0.1 #
 Ly = 0.1 #
@@ -50,6 +51,7 @@ L = 390000
 #indirect model
 maxGrainSize = 0.001
 coeffBF = 4.6E-10
+n = 2
 }
 
 #boundary conditions

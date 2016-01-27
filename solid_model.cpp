@@ -96,8 +96,9 @@ double SolidificationModel::indirect_solid_phase_fraction(double T, double vT) c
     const double k = mat_.get_k();
     const double alfa = mat_.coefficient_BF()/pow(mat_.grain_size(vT), 2.0);
     const double omega = alfa*(1.0 - exp(-1.0/alfa)) - 0.5*exp(-1.0/(2.0*alfa));
+    const double n = mat_.coefficient_n();
 
-    return 1.0/(1.0 - 2.0*k*omega) * (1.0 - pow((TM - T)/(TM - TL), (1.0 - 2.0*k*omega)/(k - 1.0)));
+    return 1.0/(1.0 - n*k*omega) * (1.0 - pow((TM - T)/(TM - TL), (1.0 - n*k*omega)/(k - 1.0)));
 }
 
 double SolidificationModel::real_solidus_temperature(double vT) const
@@ -119,8 +120,9 @@ double SolidificationModel::real_solidus_temperature(double vT) const
 
     else {
 		const double k = mat_.get_k();
+		const double n = mat_.coefficient_n();
         double alfa = mat_.coefficient_BF()/pow(mat_.grain_size(vT), 2.0);
-        double nkOmega = 2.0*k*(alfa*(1.0 - exp(-1.0/alfa)) - 0.5*exp(-1.0/(2.0*alfa)));
+        double nkOmega = n*k*(alfa*(1.0 - exp(-1.0/alfa)) - 0.5*exp(-1.0/(2.0*alfa)));
 
         double TSE = mat_.pure_melting_temperature() - (mat_.pure_melting_temperature() - mat_.liquidus_temperature())*pow(nkOmega,(k-1.0)/(1.0-nkOmega));
         if (TSE < mat_.eutectic_temperature()) TSE = mat_.eutectic_temperature();

@@ -37,16 +37,17 @@ void SolidMaterial::initialize_property_map() {
     //properites["isCasting",
     properties["T0"] = 0.0;
     properties["sourceTerm"] = 0.0;
-    properties["Ts"] = 0.0;    
+    properties["Ts"] = 0.0;
     properties["Tl"] = 0.0;
     properties["Te"] = 0.0;
     properties["Tp"] = 0.0;
     properties["lambdaL"] = 0.0;
     properties["cL"] = 0.0;
     properties["rhoL"] = 0.0;
-    properties["L"] = 0.0;          
+    properties["L"] = 0.0;
     properties["maxGrainSize"] = 0.0;
-    properties["coeffBF"] = 0.0;  
+    properties["coeffBF"] = 0.0;
+    properties["n"] = 0.0;
 }
 
 double SolidMaterial::grain_size(double vT) const
@@ -345,8 +346,8 @@ double SolidMaterial::enthalpy(double T, double vT) const
 
 MaterialProperty SolidMaterial::get_property(int num) const{
 	switch(num) {
-		case 0:                    
-                    return MaterialProperty(properties.at("lambdaS"));
+		case 0:
+            return MaterialProperty(properties.at("lambdaS"));
 		case 1:
 			return MaterialProperty(properties.at("cS"));
 		case 2:
@@ -377,16 +378,18 @@ MaterialProperty SolidMaterial::get_property(int num) const{
 			return MaterialProperty(properties.at("maxGrainSize"));
 		case 15:
 			return MaterialProperty(properties.at("coeffBF"));
+		case 16:
+			return MaterialProperty(properties.at("n"));
 	}
-	throw std::string("Reading wrong material property");	
+	throw std::string("Reading wrong material property");
 }
 
-void SolidMaterial::set_property(const string& propertyName, double value) {                    
-                        
+void SolidMaterial::set_property(const string& propertyName, double value) {
+
     if(properties.find(propertyName) == properties.end()) {
-        throw std::string("Setting wrong material property " + propertyName);	
+        throw std::string("Setting wrong material property " + propertyName);
     }
-    properties[propertyName] = value;    
+    properties[propertyName] = value;
 }
 
 void SolidMaterial::update_k() {

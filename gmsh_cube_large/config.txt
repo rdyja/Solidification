@@ -3,26 +3,38 @@
 nsd = 3
 ifBoxGrid = 0
 orderOfBF = 1
-ifDD = 0
+ifDD = 1
 gridFile = cube04B.msh
+ifLoadNodeIndicators = 1
 
 Lx = 0.1 #
 Ly = 0.1 #
 Lz = 0.1 #
-Nelemx = 20 #
-Nelemy = 20 #
-Nelemz = 20 #
+Nelemx = 10 #
+Nelemy = 10 #
+Nelemz = 10 #
 
-numberOfSteps = 100
+numberOfSteps = 1
 dt = 0.05
 saveEachStep = 1
 timeLogStart = 0
 timeLogStop = 0
 {
-name = Odlew
+name = "Odlew"
 type = material
 solid_model = INDIRECT
+#EQUILIBRIUM
+#SCHEIL
+#INDIRECT
 enthalpy_model = LINEAR_ENTHALPY_TYPE
+#LINEAR_ENTHALPY_TYPE
+#QUADRATIC_ENTHALPY_TYPE
+#PIECEWISE_QUADRATIC_ENTHALPY_TYPE
+heatcapacity_model = LEMMON_HEAT_CAPACITY
+#MORGAN_HEAT_CAPACITY
+#DELGUIDICE_HEAT_CAPACITY
+#LEMMON_HEAT_CAPACITY
+#COMMINI_HEAT_CAPACITY
 isCasting = 1
 T0 = 960
 lambdaS = 262
@@ -39,47 +51,44 @@ L = 390000
 #indirect model
 maxGrainSize = 0.001
 coeffBF = 4.6E-10
+n = 2
+}
+{
+name = "FORMA"
+type = material
+solid_model = INDIRECT
+enthalpy_model = LINEAR_ENTHALPY_TYPE
+heatcapacity_model = MORGAN_HEAT_CAPACITY
+isCasting = 0
+T0 = 660
+lambdaS = 40
+lambdaL = 0
+rhoS = 7500
+rhoL = 0
+cS = 620
+cL = 0
+Tp = 0
+Te = 0
+Ts = 0
+Tl = 0
+L = 0
+#indirect model
+maxGrainSize = 0
+coeffBF = 0
 }
 
-#indirect model
-maxGrainSize = 0.001
-coeffBF = 4.6E-10
+
 
 #boundary conditions
 {
-name = WBA
+name = "WB_3R_FORMA"
 type = bc
 alpha = 10
 Tamb = 400
 }
 {
-name = WBB
+name = "WB_4R_ODLEW"
 type = bc
-alpha = 10
-Tamb = 400
-}
-{
-name = WBC
-type = bc
-alpha = 10
-Tamb = 400
-}
-{
-name = WBD
-type = bc
-alpha = 10
-Tamb = 400
-}
-{
-name = WBE
-type = bc
-alpha = 10
-Tamb = 400
-}
-{
-name = WBF
-type = bc
-alpha = 10
-Tamb = 400
+kappa = 1000
 }
 

@@ -94,6 +94,7 @@ public:
 
   double max_grain_size() const;
   double coefficient_BF() const;
+  double coefficient_n() const;
   double grain_size(double vT) const;
   double eutectic_temperature() const;
   bool is_in_eutectic_range(double T, double vT) const;
@@ -172,6 +173,11 @@ inline double SolidMaterial::max_grain_size() const
 inline double SolidMaterial::coefficient_BF() const
 {
   return get_property(15).evaluate();
+}
+
+inline double SolidMaterial::coefficient_n() const
+{
+  return get_property(16).evaluate();
 }
 
 inline const SolidificationModel& SolidMaterial::get_solidification_model() const
