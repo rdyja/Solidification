@@ -4,7 +4,7 @@ nsd = 3
 ifBoxGrid = 0
 orderOfBF = 1
 ifDD = 1
-gridFile = simple2.msh
+gridFile = simple_test.msh
 ifLoadNodeIndicators = 1
 
 Lx = 0.1 #
@@ -14,7 +14,7 @@ Nelemx = 20 #
 Nelemy = 20 #
 Nelemz = 20 #
 
-numberOfSteps = 5
+numberOfSteps = 10
 dt = 0.1
 saveEachStep = 1
 timeLogStart = 0
